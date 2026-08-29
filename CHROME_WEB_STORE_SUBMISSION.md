@@ -1,0 +1,53 @@
+# Chrome Web Store submission answers
+
+These answers reflect the extension code in this repository. Keep the dashboard declarations, public privacy policy, and extension behavior consistent.
+
+## Privacy practices
+
+### Single purpose description
+
+> JustTheRole provides a user-controlled focus and reading layer on LinkedIn Jobs pages by hiding selected nonessential modules and locally highlighting user-defined criteria while preserving core job content and actions.
+
+### Host permission justification
+
+> The extension runs its bundled content script and stylesheet only on https://www.linkedin.com/jobs/* so it can locally identify supported job-description sections, hide user-selected nonessential modules, highlight user-defined keywords, and add reversible focus controls. It does not access other LinkedIn pages, submit applications, read cookies, or transmit page data.
+
+### Storage permission justification
+
+> The storage permission saves only the extension's configuration: whether Focus Mode is enabled, preset and category choices, keyword rules, reading-tool preferences, and search-list preferences. Settings are local by default. Chrome Sync is used only when the user explicitly enables it. Job descriptions, URLs, account data, resumes, and application data are never stored.
+
+### Remote code
+
+Select **No, I am not using remote code**.
+
+If the dashboard presents an explanation field, use:
+
+> JustTheRole does not use remote code. All JavaScript, CSS, and dependencies are bundled inside the submitted extension package. It does not load external scripts, evaluate downloaded strings, or fetch remote configuration or logic, and it makes no extension-initiated network requests.
+
+### Data-use disclosure
+
+Disclose **Website content** because the extension processes the currently displayed job description locally to recognize sections and highlight user-defined keywords. State that this content is not collected, retained, transmitted, sold, or used for advertising.
+
+Do not declare personally identifiable information, health information, financial information, authentication information, personal communications, location, or browsing history: the extension does not collect or retain those categories.
+
+### Certification
+
+After reviewing the declarations, select the checkbox certifying compliance with the Chrome Web Store Developer Program Policies and click **Save Draft**.
+
+## Publisher account settings
+
+1. Open the Developer Dashboard **Settings** page.
+2. Enter an email address that you actively monitor.
+3. Send the verification message.
+4. Open the message and complete verification.
+5. Return to the item and save the draft again.
+
+These account steps cannot be completed in extension code.
+
+## Public URLs
+
+These URLs work only after the repository is public and the files have been committed and pushed:
+
+- Homepage URL: `https://github.com/agrayush13/just-the-role-src`
+- Support URL: `https://github.com/agrayush13/just-the-role-src/issues`
+- Privacy policy URL: `https://github.com/agrayush13/just-the-role-src/blob/main/PRIVACY.md`

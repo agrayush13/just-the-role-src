@@ -36,6 +36,8 @@ LinkedIn can change its DOM independently. Selectors are centralized and version
 - [Product and interaction design](docs/PRODUCT_DESIGN.md) — user journeys, interface behavior, content language, and accessibility.
 - [Architecture](docs/ARCHITECTURE.md) — components, runtime flow, DOM safety, storage, and build boundaries.
 - [Settings schema](docs/SETTINGS_SCHEMA.md) — persisted data model, preset matrix, normalization, migration, and Sync behavior.
+- [Privacy policy](PRIVACY.md) — local processing, storage, Sync, retention, and Limited Use disclosure.
+- [Chrome Web Store submission answers](CHROME_WEB_STORE_SUBMISSION.md) — paste-ready privacy declarations and account checklist.
 
 ## Local development
 
