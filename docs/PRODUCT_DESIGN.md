@@ -4,7 +4,7 @@
 
 1. **The role stays primary.** Employer-written content and primary job actions remain intact.
 2. **The user supplies meaning.** Keyword colors reflect explicit rules; the product never infers fit or importance.
-3. **Every change has an exit.** Show original, Undo, view switching, section expansion, and search counters make transformations reversible.
+3. **Every change has an exit.** Show original, Undo, view switching, and section expansion make transformations reversible.
 4. **Uncertainty stays visible.** Unknown DOM structures and ambiguous labels are not changed.
 5. **Privacy is part of the interface.** Sync is off by default, sensitive settings are disclosed, and diagnostics state what they omit.
 
@@ -36,10 +36,6 @@ Text labels accompany color so meaning is not color-dependent. Links and control
 
 When two or more reviewed headings are present, the Focus Bar offers jump links and the page adds collapse/expand controls. Collapse state resets on navigation and is never stored.
 
-### Cleaning a search list
-
-Search cleanup is contained in a closed Experimental disclosure and starts off. Explicit Viewed or Applied labels may drive reversible collapsing. A Sponsored or Promoted label always exempts the card, even if another recognized status is present.
-
 ## Interface surfaces
 
 ### Popup
@@ -48,7 +44,7 @@ The popup is a compact quick-control surface: logo and name on the left, current
 
 ### Options page
 
-The options page is the durable configuration surface: views, module categories, keyword-rule editing, reading tools, Sync disclosure, search-list settings, and reset-to-defaults.
+The options page is the durable configuration surface: views, module categories, keyword-rule editing, reading tools, Sync disclosure, and reset-to-defaults.
 
 ### Focus Bar
 

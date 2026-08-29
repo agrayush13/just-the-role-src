@@ -30,6 +30,18 @@ test("new installs are disabled with Balanced selected", () => {
   assert.equal(settings.uiPreferences.focusBarVisible, true);
 });
 
+test("hidden experimental search settings are normalized off", () => {
+  const settings = normalizeSettings({
+    ...structuredClone(DEFAULT_SETTINGS),
+    searchBeta: { compactDensity: true, collapseViewed: true, collapseApplied: true },
+  });
+  assert.deepEqual(settings.searchBeta, {
+    compactDensity: false,
+    collapseViewed: false,
+    collapseApplied: false,
+  });
+});
+
 test("the on-page widget preference is normalized and can be hidden independently", () => {
   const settings = normalizeSettings({
     ...structuredClone(DEFAULT_SETTINGS),

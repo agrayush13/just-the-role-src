@@ -16,7 +16,6 @@ Chrome storage.sync (opt-in)┘            │
                                                 ├── restore prior mutations
                                                 ├── apply safe layout rules
                                                 ├── apply reading tools
-                                                ├── apply search cleanup
                                                 └── render Focus Bar
 ```
 
@@ -28,7 +27,7 @@ Chrome storage.sync (opt-in)┘            │
 - `src/shared/html.ts` escapes untrusted text before Shadow DOM HTML rendering.
 - `src/content/registry.ts` is the versioned selector map and protected-anchor safety boundary.
 - `src/content/keyword-dom.ts` adds and restores markers without replacing description HTML.
-- `src/content/search-beta.ts` classifies explicit card labels.
+- `src/content/search-beta.ts` retains dormant search-card classification logic for internal development. The shipping availability flag is false, so it has no user-facing runtime behavior.
 - `src/content/index.ts` coordinates detection, transformations, restoration, navigation changes, DOM updates, and the Focus Bar.
 - `src/popup/` provides compact quick controls, settings access, and a secondary privacy-safe diagnostics action.
 - `src/options/` provides complete configuration editing.
@@ -45,11 +44,11 @@ Each apply pass:
 1. records scroll position and removes every extension-owned mutation from the previous pass;
 2. detects a rendered job root, title, and description from the restored page;
 3. resets transient diagnostics;
-4. when Focus Mode is active and original view is not requested, applies layout rules, keyword markers, section controls, and search cleanup;
+4. when Focus Mode is active and original view is not requested, applies layout rules, keyword markers, and section controls;
 5. renders the Focus Bar whenever its independent visibility preference is enabled, including an Enable action when Focus Mode is off, or removes it when the preference is disabled;
 6. restores scroll position and clears observer records created by the pass.
 
-Relevant page mutations are debounced. Mutations inside extension UI or keyword markers are ignored to prevent feedback loops. Route changes clear session-only state such as Show original, Undo, collapsed sections, and revealed search cards.
+Relevant page mutations are debounced. Mutations inside extension UI or keyword markers are ignored to prevent feedback loops. Route changes clear session-only state such as Show original, Undo, and collapsed sections.
 
 ## Safe DOM transformation model
 
@@ -59,7 +58,7 @@ Layout hiding is CSS-driven through `data-jtr-hidden`. Before changing `aria-hid
 
 Keyword processing walks visible text nodes below description content. It skips interactive, executable, hidden, and extension-owned regions. Matches are inserted from the end of each text node so ranges remain stable. Restoration replaces marks with text nodes and normalizes their parents.
 
-Section and search transformations also use extension-owned data attributes. No employer-authored text or event handlers are rewritten.
+Section transformations also use extension-owned data attributes. No employer-authored text or event handlers are rewritten.
 
 ## Focus Bar isolation
 
@@ -85,6 +84,6 @@ Storage events update open job pages immediately. The background worker mirrors 
 
 ## Testing strategy
 
-Unit tests cover matching, schema, migration, selector safety, escaping, search labels, sections, and marker restoration. A sanitized fixture exercises the bundled content script against LinkedIn-like markup. The release command validates the built artifact.
+Unit tests cover matching, schema, migration, selector safety, escaping, sections, marker restoration, and dormant experimental helpers. A sanitized fixture exercises the bundled content script against LinkedIn-like markup. The release command validates the built artifact.
 
 The selector registry is the main external compatibility boundary. It requires manual signed-in validation before release because fixtures cannot observe future LinkedIn markup changes or account-specific experiments.

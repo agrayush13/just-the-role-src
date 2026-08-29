@@ -14,7 +14,7 @@ These answers reflect the extension code in this repository. Keep the dashboard 
 
 ### Storage permission justification
 
-> The storage permission saves only the extension's configuration: whether Focus Mode is enabled, preset and category choices, keyword rules, reading-tool preferences, on-page widget visibility, and search-list preferences. Settings are local by default. Chrome Sync is used only when the user explicitly enables it. Job descriptions, URLs, account data, resumes, and application data are never stored.
+> The storage permission saves only the extension's configuration: whether Focus Mode is enabled, preset and category choices, keyword rules, reading-tool preferences, and on-page widget visibility. Settings are local by default. Chrome Sync is used only when the user explicitly enables it. Job descriptions, URLs, account data, resumes, and application data are never stored.
 
 ### Active tab permission justification
 

@@ -1,6 +1,7 @@
 export const SETTINGS_KEY = "settingsV2" as const;
 export const LEGACY_SETTINGS_KEY = "settingsV1" as const;
 export const SETTINGS_SCHEMA_VERSION = 2 as const;
+export const EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE = false as const;
 
 export const CATEGORY_KEYS = [
   "aiMatch",
@@ -222,9 +223,15 @@ export function normalizeSettings(value: unknown): Settings {
       sectionControlsEnabled: bool(input.readingTools?.sectionControlsEnabled, true),
     },
     searchBeta: {
-      compactDensity: bool(input.searchBeta?.compactDensity, false),
-      collapseViewed: bool(input.searchBeta?.collapseViewed, false),
-      collapseApplied: bool(input.searchBeta?.collapseApplied, false),
+      compactDensity: EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE
+        ? bool(input.searchBeta?.compactDensity, false)
+        : false,
+      collapseViewed: EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE
+        ? bool(input.searchBeta?.collapseViewed, false)
+        : false,
+      collapseApplied: EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE
+        ? bool(input.searchBeta?.collapseApplied, false)
+        : false,
     },
     syncEnabled: bool(input.syncEnabled, false),
     uiPreferences: {

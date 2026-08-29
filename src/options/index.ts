@@ -4,6 +4,7 @@ import {
   CATEGORY_KEYS,
   CATEGORY_LABELS,
   DEFAULT_SETTINGS,
+  EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE,
   SETTINGS_KEY,
   customizeModule,
   enableSettingsSync,
@@ -20,6 +21,7 @@ import {
 } from "../shared/settings";
 
 let settings: Settings;
+document.querySelector<HTMLElement>("#experimental-search-cleanup")!.hidden = !EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE;
 const feedback = document.querySelector<HTMLElement>("#feedback")!;
 const keywordError = document.querySelector<HTMLElement>("#keyword-error")!;
 const customSelects = new Map<string, SelectMenuController>();

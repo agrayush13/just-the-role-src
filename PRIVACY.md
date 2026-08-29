@@ -1,6 +1,6 @@
 # JUSTTHEROLE Privacy Policy
 
-Last updated: August 29, 2026
+Last updated: August 30, 2026
 
 JUSTTHEROLE provides a user-controlled focus and reading layer for supported LinkedIn Jobs pages. It changes how page content is displayed and highlights criteria that the user explicitly configures.
 
@@ -10,7 +10,7 @@ JUSTTHEROLE processes the currently displayed job page locally in the browser to
 
 ## Configuration stored by Chrome
 
-The extension stores only its configuration: the Focus Mode switch, selected preset, category visibility choices, reading-tool preferences, search-list preferences, and keyword rules. This configuration is stored locally through Chrome's extension storage API.
+The extension stores only its configuration: the Focus Mode switch, selected preset, category visibility choices, reading-tool preferences, on-page widget preference, and keyword rules. This configuration is stored locally through Chrome's extension storage API.
 
 Chrome Sync is off by default. If the user explicitly enables it, Chrome may synchronize the same configuration—including keyword rules—through the user's Chrome account. Disabling Sync removes the extension's synchronized configuration while retaining the local copy.
 

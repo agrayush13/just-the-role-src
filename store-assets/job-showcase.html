@@ -64,12 +64,12 @@
     </style>
     <script>
       const query = new URLSearchParams(location.search);
-      const searchMode = query.get("view") === "search";
+      const customMode = query.get("view") === "custom";
       if (query.get("theme") === "dark") document.documentElement.dataset.previewTheme = "dark";
       const settings = {
         schemaVersion: 2,
         enabled: true,
-        activePreset: "balanced",
+        activePreset: customMode ? "custom" : "balanced",
         customBasePreset: "balanced",
         moduleRules: {
           aiMatch: true, applicantInsights: false, premiumUpsells: true,
@@ -84,7 +84,7 @@
           { id: "check-1", text: "onsite only", type: "dealbreaker", matchMode: "phrase", enabled: true }
         ],
         readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
-        searchBeta: { compactDensity: searchMode, collapseViewed: searchMode, collapseApplied: searchMode },
+        searchBeta: { compactDensity: false, collapseViewed: false, collapseApplied: false },
         syncEnabled: false,
         uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline", focusBarVisible: true }
       };

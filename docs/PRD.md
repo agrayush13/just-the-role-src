@@ -68,14 +68,6 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-24:** Ambiguous, duplicate, or unrecognized headings must fail open.
 - **FR-25:** Jump controls must target the original heading; collapse state must be reversible and session-only.
 
-### Search-list cleanup
-
-- **FR-26:** Search-list cleanup must be separately configurable, disabled by default, and contained in a closed Experimental disclosure on first render.
-- **FR-27:** Compact density may reduce spacing but must not remove facts or actions.
-- **FR-28:** Only cards with an explicit leading Viewed or Applied status label may be collapsed.
-- **FR-29:** Cards containing a visible Sponsored or Promoted label must never be collapsed.
-- **FR-30:** The Focus Bar must provide reversible counters for collapsed Viewed and Applied cards.
-
 ### Settings, Sync, and privacy
 
 - **FR-31:** Persisted data must be normalized through an allowlisted schema before use or storage.
@@ -108,7 +100,7 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 A release candidate is acceptable when:
 
 - strict TypeScript checks, automated tests, and the production build pass;
-- the sanitized fixture verifies hiding, highlighting, section controls, search cleanup, direct Custom controls, and complete restoration;
+- the sanitized fixture verifies hiding, highlighting, section controls, direct Custom controls, and complete restoration;
 - the store package contains one root manifest and no development-only files;
 - manual signed-in checks cover direct job pages and split search/detail views on current LinkedIn markup;
 - Apply, Save, Share, Report, title, and company/location context remain usable in every view; About the job remains visible in every built-in preset and is restored after its explicit Custom hiding choice is reversed;
@@ -124,3 +116,5 @@ This repository intentionally includes no telemetry. Success should be assessed 
 ## Known product boundary
 
 Automated tests use a sanitized LinkedIn-like fixture. Because LinkedIn markup is external and changes over time, live signed-in selector validation remains a release requirement rather than a capability the repository can guarantee permanently.
+
+Search-list cleanup is outside the current product scope. Its dormant implementation remains in the repository for internal development but is unavailable in shipping UI and runtime behavior.

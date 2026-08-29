@@ -75,7 +75,7 @@ The versioned key and number describe storage compatibility only. They are not p
 | `customModuleRules` | category-to-boolean map | Saved Custom configuration, recalled independently of the previously active built-in preset. Missing legacy values default to Balanced unless the stored active view is already Custom, in which case its effective rules are preserved. |
 | `keywordRules` | up to 50 `KeywordRule` objects | User-defined local matching configuration. |
 | `readingTools` | booleans | Enables keyword markers and reliable-section controls independently. |
-| `searchBeta` | booleans | Default-off search-list density and collapse controls. |
+| `searchBeta` | booleans | Dormant compatibility fields retained for internal development. Shipping normalization forces every value to `false`; no user-facing control or runtime behavior is available. |
 | `syncEnabled` | boolean | Opt-in configuration synchronization. |
 | `uiPreferences.reducedMotion` | `system`, `reduce` | Uses system behavior or forces non-smooth in-page navigation. |
 | `uiPreferences.controlPlacement` | `inline` | Reserved, allowlisted Focus Bar placement. |
@@ -118,7 +118,7 @@ The versioned key and number describe storage compatibility only. They are not p
 | Top navigation | false | false | false |
 | Search results pane | false | false | false |
 
-The last two categories remain in the schema for compatibility but are not offered as manual hiding controls. Search-list cleanup uses separately gated settings.
+The last two categories remain in the schema for compatibility but are not offered as manual hiding controls.
 
 ## Normalization boundary
 
@@ -128,6 +128,7 @@ Every load and save passes through `normalizeSettings`. It:
 - allowlists every returned field and nested value;
 - applies boolean and enum defaults;
 - reconstructs the complete category map;
+- forces dormant experimental search flags to `false`;
 - caps keyword rules at 50 and text at 60 characters;
 - discards empty rules and unknown top-level data.
 

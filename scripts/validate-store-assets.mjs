@@ -3,9 +3,8 @@ import { readFile } from "node:fs/promises";
 const expectedAssets = new Map([
   ["store-assets/screenshots/01-focus-mode.png", [1280, 800]],
   ["store-assets/screenshots/02-keywords-and-sections.png", [1280, 800]],
-  ["store-assets/screenshots/03-customize-page.png", [1280, 800]],
+  ["store-assets/screenshots/03-custom-controls.png", [1280, 800]],
   ["store-assets/screenshots/04-presets-and-settings.png", [1280, 800]],
-  ["store-assets/screenshots/05-search-list-cleanup.png", [1280, 800]],
   ["store-assets/promo/small-promo-440x280.png", [440, 280]],
   ["store-assets/promo/marquee-promo-1400x560.png", [1400, 560]],
 ]);

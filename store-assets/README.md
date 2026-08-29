@@ -8,11 +8,19 @@ Upload in this order:
 
 1. `screenshots/01-focus-mode.png` — Focus Mode on a sanitized job listing
 2. `screenshots/02-keywords-and-sections.png` — local keyword markers and section navigation
-3. `screenshots/03-customize-page.png` — direct Custom page-block controls
+3. `screenshots/03-custom-controls.png` — direct Custom page-block controls
 4. `screenshots/04-presets-and-settings.png` — presets and extension settings
-5. `screenshots/05-search-list-cleanup.png` — reversible Viewed/Applied cleanup with promoted jobs preserved
 
 Each screenshot is 1280×800.
+
+Capture sources:
+
+- `01-focus-mode.png` — `/jobs/view/showcase` at the top of the page.
+- `02-keywords-and-sections.png` — `/jobs/view/showcase`, scrolled to the description.
+- `03-custom-controls.png` — `/jobs/view/showcase?view=custom`.
+- `04-presets-and-settings.png` — `/options.html`.
+
+`archive/` retains superseded product screenshots for project history. Do not upload archived images to the Chrome Web Store.
 
 ## Promotional images
 

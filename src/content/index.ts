@@ -6,6 +6,7 @@ import {
   CATEGORY_KEYS,
   CATEGORY_LABELS,
   DEFAULT_SETTINGS,
+  EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE,
   SETTINGS_KEY,
   customizeModule,
   loadSettings,
@@ -253,6 +254,7 @@ function restoreSearchBeta(): void {
 }
 
 function applySearchBeta(): void {
+  if (!EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE) return;
   const searchList = firstMatch([
     ".jobs-search-results-list",
     "[data-view-name='jobs-search-results-list']",
@@ -467,7 +469,7 @@ function renderFocusBar(view: JobView | null): void {
       </div>
       ${nav ? `<nav class="nav" aria-label="Job description sections"><span class="label">Jump to</span>${nav}</nav>` : ""}
       ${countSummary ? `<div class="counts" aria-label="Keyword match counts"><span class="label">Matches</span>${countSummary}</div>` : ""}
-      ${(settings.searchBeta.collapseViewed && searchCounts.viewed) || (settings.searchBeta.collapseApplied && searchCounts.applied) ? `<div class="search"><span class="label">Search list</span>${settings.searchBeta.collapseViewed && searchCounts.viewed ? `<button type="button" data-action="show-viewed">${showViewed ? "Hide" : "Show"} viewed (${searchCounts.viewed})</button>` : ""}${settings.searchBeta.collapseApplied && searchCounts.applied ? `<button type="button" data-action="show-applied">${showApplied ? "Hide" : "Show"} applied (${searchCounts.applied})</button>` : ""}</div>` : ""}
+      ${EXPERIMENTAL_SEARCH_CLEANUP_AVAILABLE && ((settings.searchBeta.collapseViewed && searchCounts.viewed) || (settings.searchBeta.collapseApplied && searchCounts.applied)) ? `<div class="search"><span class="label">Search list</span>${settings.searchBeta.collapseViewed && searchCounts.viewed ? `<button type="button" data-action="show-viewed">${showViewed ? "Hide" : "Show"} viewed (${searchCounts.viewed})</button>` : ""}${settings.searchBeta.collapseApplied && searchCounts.applied ? `<button type="button" data-action="show-applied">${showApplied ? "Hide" : "Show"} applied (${searchCounts.applied})</button>` : ""}</div>` : ""}
       <p class="status" aria-live="polite">${temporaryOriginal ? "Original page shown for this job session." : normalStatus}</p>
     </section>
   `;
