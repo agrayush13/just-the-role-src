@@ -1,4 +1,5 @@
 import {
+  DEFAULT_SETTINGS,
   loadSettings,
   saveSettings,
   settingsForPreset,
@@ -44,8 +45,12 @@ function render(): void {
 }
 
 async function persist(): Promise<void> {
-  const result = await saveSettings(settings);
-  feedback.textContent = result.syncError ? "Saved locally; Chrome Sync is unavailable" : "Saved";
+  try {
+    const result = await saveSettings(settings);
+    feedback.textContent = result.syncError ? "Saved locally; Chrome Sync is unavailable" : "Saved";
+  } catch {
+    feedback.textContent = "Could not save settings. Please try again.";
+  }
   window.setTimeout(() => { feedback.textContent = ""; }, 1200);
 }
 
@@ -94,12 +99,21 @@ document.querySelector("#copy-diagnostics")?.addEventListener("click", async () 
     },
     routeType: contentStatus?.urlKind ?? "unavailable",
   };
-  await navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
-  feedback.textContent = "Safe diagnostics copied — no text, URL, or account data included";
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
+    feedback.textContent = "Safe diagnostics copied — no text, URL, or account data included";
+  } catch {
+    feedback.textContent = "Could not copy diagnostics. Check clipboard access and try again.";
+  }
 });
 
 async function start(): Promise<void> {
-  settings = await loadSettings();
+  try {
+    settings = await loadSettings();
+  } catch {
+    settings = structuredClone(DEFAULT_SETTINGS);
+    feedback.textContent = "Settings storage is unavailable; showing safe defaults.";
+  }
   contentStatus = await getActiveTabStatus();
   pageStatus.textContent =
     contentStatus?.pageStatus === "supported"

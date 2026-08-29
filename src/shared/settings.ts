@@ -192,6 +192,19 @@ export function normalizeSettings(value: unknown): Settings {
   };
 }
 
+export function settingsFromStorageChange(
+  areaName: string,
+  newValue: unknown,
+  currentSettings: Settings,
+): Settings | null {
+  if (areaName === "local") {
+    return newValue === undefined ? null : normalizeSettings(newValue);
+  }
+  if (areaName !== "sync" || !currentSettings.syncEnabled) return null;
+  if (newValue === undefined) return { ...currentSettings, syncEnabled: false };
+  return { ...normalizeSettings(newValue), syncEnabled: true };
+}
+
 export function settingsForPreset(settings: Settings, preset: Preset): Settings {
   if (preset === "custom") return { ...settings, activePreset: "custom" };
   const rules = preset === "minimal" ? MINIMAL_RULES : preset === "native" ? NATIVE_RULES : BALANCED_RULES;

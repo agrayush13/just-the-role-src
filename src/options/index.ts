@@ -26,8 +26,12 @@ const presetDescriptions: Record<Exclude<Preset, "custom">, string> = {
 };
 
 async function persist(message = "Saved"): Promise<void> {
-  const result = await saveSettings(settings);
-  feedback.textContent = result.syncError ? `Saved locally. Sync unavailable: ${result.syncError}` : message;
+  try {
+    const result = await saveSettings(settings);
+    feedback.textContent = result.syncError ? `Saved locally. Sync unavailable: ${result.syncError}` : message;
+  } catch {
+    feedback.textContent = "Could not save settings. Please try again.";
+  }
   window.setTimeout(() => { feedback.textContent = ""; }, 2500);
 }
 
@@ -58,7 +62,11 @@ function renderPresets(): void {
   custom.setAttribute("role", "radio");
   custom.setAttribute("aria-checked", String(settings.activePreset === "custom"));
   custom.disabled = settings.activePreset !== "custom";
-  custom.innerHTML = "<strong>Custom</strong><span>Your saved category-level choices. Created automatically after a change.</span>";
+  const customTitle = document.createElement("strong");
+  customTitle.textContent = "Custom";
+  const customDetail = document.createElement("span");
+  customDetail.textContent = "Your saved category-level choices. Created automatically after a change.";
+  custom.append(customTitle, customDetail);
   root.append(custom);
 }
 
@@ -211,11 +219,16 @@ document.querySelector("#reset")!.addEventListener("click", async () => {
   settings = structuredClone(DEFAULT_SETTINGS);
   resetKeywordForm();
   renderAll();
-  await persist("Phase 2 defaults restored");
+  await persist("Defaults restored");
 });
 
 async function start(): Promise<void> {
-  settings = await loadSettings();
+  try {
+    settings = await loadSettings();
+  } catch {
+    settings = structuredClone(DEFAULT_SETTINGS);
+    feedback.textContent = "Settings storage is unavailable; showing safe defaults.";
+  }
   renderAll();
 }
 

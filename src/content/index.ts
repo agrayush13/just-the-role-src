@@ -1,4 +1,5 @@
 import { emptyKeywordCounts } from "../shared/keywords";
+import { escapeHtml } from "../shared/html";
 import { recognizeSectionHeading, type SectionKind } from "../shared/sections";
 import {
   CATEGORY_LABELS,
@@ -6,8 +7,8 @@ import {
   SETTINGS_KEY,
   customizeModule,
   loadSettings,
-  normalizeSettings,
   saveSettings,
+  settingsFromStorageChange,
   settingsForPreset,
   type CategoryKey,
   type KeywordType,
@@ -85,18 +86,32 @@ function firstMatch(selectors: readonly string[], root: ParentNode = document): 
   return null;
 }
 
+function allMatches(selectors: readonly string[], root: ParentNode = document): Element[] {
+  const matches = new Set<Element>();
+  for (const selector of selectors) root.querySelectorAll(selector).forEach((element) => matches.add(element));
+  return [...matches];
+}
+
+function isRendered(element: Element): boolean {
+  if (!element.isConnected || element.closest("[hidden], [aria-hidden='true']")) return false;
+  const style = getComputedStyle(element);
+  return style.display !== "none" && style.visibility !== "hidden" && element.getClientRects().length > 0;
+}
+
 function detectJobView(): JobView | null {
   if (!location.pathname.startsWith("/jobs")) return null;
-  const root = firstMatch(JOB_ROOT_SELECTORS);
-  if (!root) return null;
-  const title = firstMatch(TITLE_SELECTORS, root) ?? firstMatch(TITLE_SELECTORS);
-  const description = firstMatch(DESCRIPTION_SELECTORS, root);
-  if (!title || !description) return null;
-  const descriptionContent =
-    description.matches(".jobs-box__html-content")
-      ? description
-      : description.querySelector(".jobs-box__html-content") ?? description;
-  return { root, title, description, descriptionContent };
+  const roots = allMatches(JOB_ROOT_SELECTORS).filter(isRendered).reverse();
+  for (const root of roots) {
+    const title = firstMatch(TITLE_SELECTORS, root);
+    const description = firstMatch(DESCRIPTION_SELECTORS, root);
+    if (!title || !description || !isRendered(title) || !isRendered(description)) continue;
+    const descriptionContent =
+      description.matches(".jobs-box__html-content")
+        ? description
+        : description.querySelector(".jobs-box__html-content") ?? description;
+    return { root, title, description, descriptionContent };
+  }
+  return null;
 }
 
 function restoreHiddenElement(element: HTMLElement): void {
@@ -365,6 +380,8 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
     host.id = CONTROL_HOST_ID;
     host.setAttribute("data-jtr-ui", "true");
     host.attachShadow({ mode: "open" });
+  }
+  if (host.parentElement !== view.description.parentElement || host.nextElementSibling !== view.description) {
     view.description.before(host);
   }
   host.dataset.jtrTheme = pageTheme(view.description);
@@ -374,7 +391,7 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
     .map(([type, count]) => `<span class="count">${type === "positive" ? "Desired" : type === "dealbreaker" ? "Check" : "Notice"}: ${count}</span>`)
     .join("");
   const nav = detectedSections
-    .map((section) => `<button type="button" data-action="section" data-section="${section.kind}">${section.label}</button>`)
+    .map((section) => `<button type="button" data-action="section" data-section="${section.kind}">${escapeHtml(section.label)}</button>`)
     .join("");
   const pickerList = [...(candidates ?? collectCandidates(view))]
     .map(([category, elements]) => `<button type="button" data-action="candidate" data-category="${category}">${settings.moduleRules[category] ? "Show" : "Hide"} ${CATEGORY_LABELS[category]} (${elements.length})</button>`)
@@ -531,8 +548,13 @@ const observer = new MutationObserver((mutations) => {
 });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (!['local', 'sync'].includes(areaName) || !changes[SETTINGS_KEY]) return;
-  settings = normalizeSettings(changes[SETTINGS_KEY].newValue);
+  if (!changes[SETTINGS_KEY]) return;
+  const nextSettings = settingsFromStorageChange(areaName, changes[SETTINGS_KEY].newValue, settings);
+  if (!nextSettings) return;
+  settings = nextSettings;
+  if (areaName === "sync" && changes[SETTINGS_KEY].newValue === undefined) {
+    void chrome.storage.local.set({ [SETTINGS_KEY]: settings });
+  }
   temporaryOriginal = false;
   undoSettings = null;
   scheduleApply(0);

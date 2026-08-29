@@ -8,10 +8,11 @@ import {
   customizeModule,
   migrateLegacySettings,
   normalizeSettings,
+  settingsFromStorageChange,
   settingsForPreset,
 } from "../src/shared/settings";
 
-test("new Phase 2 installs are disabled with Balanced selected", () => {
+test("new installs are disabled with Balanced selected", () => {
   const settings = normalizeSettings(undefined);
   assert.equal(settings.enabled, false);
   assert.equal(settings.activePreset, "balanced");
@@ -23,7 +24,7 @@ test("new Phase 2 installs are disabled with Balanced selected", () => {
   });
 });
 
-test("Phase 1 settings migrate to Custom without changing effective visibility", () => {
+test("legacy settings migrate to Custom without changing effective visibility", () => {
   const legacyCategories = Object.fromEntries(
     CATEGORY_KEYS.map((key, index) => [key, index % 2 === 0]),
   );
@@ -57,4 +58,30 @@ test("schema normalization strips unknown data-boundary fields", () => {
   });
   assert.equal("jobUrl" in settings, false);
   assert.equal("description" in settings, false);
+});
+
+test("a local storage update is applied but a local deletion is ignored", () => {
+  const current = structuredClone(DEFAULT_SETTINGS);
+  const updated = settingsFromStorageChange("local", { ...current, enabled: true }, current);
+  assert.equal(updated?.enabled, true);
+  assert.equal(settingsFromStorageChange("local", undefined, current), null);
+});
+
+test("removing sync disables sync without resetting the current configuration", () => {
+  const current = {
+    ...structuredClone(DEFAULT_SETTINGS),
+    enabled: true,
+    activePreset: "minimal" as const,
+    syncEnabled: true,
+  };
+  const updated = settingsFromStorageChange("sync", undefined, current);
+  assert.equal(updated?.enabled, true);
+  assert.equal(updated?.activePreset, "minimal");
+  assert.equal(updated?.syncEnabled, false);
+});
+
+test("stale sync updates are ignored when sync is disabled", () => {
+  const current = structuredClone(DEFAULT_SETTINGS);
+  const synced = { ...current, enabled: true, syncEnabled: true };
+  assert.equal(settingsFromStorageChange("sync", synced, current), null);
 });

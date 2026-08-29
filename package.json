@@ -7,12 +7,15 @@
     "build": "node scripts/build.mjs",
     "check": "tsc --noEmit",
     "test": "node --import tsx --test tests/**/*.test.ts",
-    "verify": "npm run check && npm test && npm run build"
+    "verify": "npm run check && npm test && npm run build",
+    "package:store": "npm run verify && node scripts/package-store.mjs",
+    "chrome-extension": "npm run package:store"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
     "@types/node": "^22.10.5",
     "esbuild": "^0.25.0",
+    "fflate": "^0.8.3",
     "happy-dom": "^20.11.12",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
