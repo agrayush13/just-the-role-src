@@ -1,28 +1,60 @@
 # JustTheRole
 
-A privacy-first Chrome extension that turns supported LinkedIn Jobs views into a personal focus layer.
+JustTheRole is a privacy-first Chrome extension that turns supported LinkedIn Jobs pages into a calmer, personal reading view. It hides only recognized, non-essential page blocks, marks words and phrases the user defines, adds navigation for reliably detected description sections, and can reduce clutter in a search-results list.
 
-The extension is deterministic and visual-only: no scraping, remote analytics, automation, summaries, scoring, job-data storage, or extension-initiated network requests.
+The extension is deterministic and visual-only. It does not scrape jobs, summarize or score descriptions, automate LinkedIn actions, collect analytics, store job content, or make extension-initiated network requests.
 
-## Features
+## What it does
 
-- Balanced, Minimal, Native, and automatically created Custom presets
-- Schema-v2 migration that preserves legacy category choices
-- A Shadow DOM Focus Bar with Show original, Undo, and restore-preset actions
-- A supported-block picker with pointer outlines and a keyboard-accessible modal list
-- Local positive, neutral, and dealbreaker keyword rules with clean DOM restoration
-- Conservative English section navigation and session-only collapse controls
-- Optional Chrome Sync with disclosure, quota-error fallback, and local retention
-- A separately gated, default-off search-list beta that hard-excludes sponsored/promoted cards
+Focus Mode is off on a fresh install. After the user enables it, JustTheRole applies one of these views:
 
-## Local setup
+- **Balanced** hides supported match, upsell, recommendation, and promotional modules while retaining useful job context.
+- **Minimal** keeps the job title, company and location context, original description, and core actions while hiding all supported optional modules.
+- **Native** leaves LinkedIn page modules visible while retaining separately enabled reading tools.
+- **Custom** is created automatically when the user changes an individual supported category.
+
+On a supported job detail view, the in-page Focus Bar lets the user switch views without reloading, temporarily show the original page, undo the latest view change, restore the preset behind a Custom view, and open a safe page-block picker. Core content and actions—including the title, company/location context, description, Apply, Save, Share, and Report—are protected from hiding.
+
+Optional reading tools provide:
+
+- Local **Desired**, **Notice**, and **Check** keyword markers using whole-word or exact-phrase matching.
+- Match counts without interpretation, ranking, or scoring.
+- Jump links and session-only collapse controls when at least two unambiguous English section headings are recognized.
+- A default-off search-list cleanup that can use compact spacing and reversibly collapse explicitly labeled Viewed or Applied cards. Sponsored and promoted cards are never collapsed.
+
+## Privacy and safety
+
+Only extension configuration is stored: the Focus Mode switch, selected view, module choices, keyword rules, reading-tool preferences, search-list preferences, and UI preferences. Chrome Sync is optional and off by default. When enabled, the same configuration—including potentially sensitive keyword rules—may be synchronized through the user's Chrome account; the local copy remains available if Sync fails.
+
+JustTheRole does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests only Chrome storage and narrowly scoped access to `https://www.linkedin.com/jobs/*`.
+
+LinkedIn can change its DOM independently. Selectors are centralized and versioned, every candidate is safety-checked independently, and unrecognized structures fail open by remaining visible. Disabling Focus Mode or choosing **Show original** removes all DOM changes made by the extension.
+
+## Documentation
+
+- [Product requirements](docs/PRD.md) — scope, behavior, non-goals, and acceptance criteria.
+- [Product and interaction design](docs/PRODUCT_DESIGN.md) — user journeys, interface behavior, content language, and accessibility.
+- [Architecture](docs/ARCHITECTURE.md) — components, runtime flow, DOM safety, storage, and build boundaries.
+- [Settings schema](docs/SETTINGS_SCHEMA.md) — persisted data model, preset matrix, normalization, migration, and Sync behavior.
+
+## Local development
+
+Requirements: a current Node.js release, npm, and Chrome 120 or newer.
 
 ```sh
 npm install
 npm run verify
 ```
 
-Then open `chrome://extensions`, enable Developer mode, choose **Load unpacked**, and select the generated `dist/` directory.
+Then open `chrome://extensions`, enable Developer mode, select **Load unpacked**, and choose the generated `dist/` directory.
+
+Useful commands:
+
+- `npm run check` — strict TypeScript validation.
+- `npm test` — unit and sanitized DOM tests.
+- `npm run build` — create the unpacked extension in `dist/`.
+- `npm run verify` — run checks, tests, and the production build.
+- `npm run chrome-extension` — verify and create a Chrome Web Store archive.
 
 ## Chrome Web Store package
 
@@ -30,21 +62,23 @@ Then open `chrome://extensions`, enable Developer mode, choose **Load unpacked**
 npm run chrome-extension
 ```
 
-Upload the generated `release/just-the-role-chrome-extension-v<version>.zip` file directly to the Chrome Web Store. Do not zip the repository or upload the `dist/` folder itself: the release command runs the complete verification suite, validates that the archive contains exactly one `manifest.json` at its root, and excludes source, tests, source maps, dependencies, and other development files. `npm run package:store` remains available as an equivalent command.
+Upload `release/just-the-role-chrome-extension-v<version>.zip`. The packaging script verifies a single root `manifest.json`, checks required assets, and excludes source files, tests, source maps, dependencies, and hidden development files.
 
-## Safety model
+## Project structure
 
-- Fresh installs are disabled until the user enables Focus Mode.
-- Selectors are centralized in `src/content/registry.ts`, versioned, and evaluated independently.
-- Any candidate containing a title, description, Apply, Save, Share, or Report control is rejected.
-- Disabling Focus Mode or selecting Show original removes every wrapper, marker, attribute, section control, and search-list mutation applied by the extension.
-- The extension requests only `storage` and narrowly scoped LinkedIn jobs host access.
-- Settings normalization allowlists configuration fields; job content, URLs, account data, and derived scores cannot enter the schema.
+```text
+src/content/   LinkedIn page detection, safe DOM transformations, and Focus Bar
+src/popup/     Toolbar popup and privacy-safe diagnostics
+src/options/   Full settings and keyword-rule editor
+src/shared/    Settings, matching, escaping, and section-recognition logic
+src/privacy/   Packaged privacy disclosure
+tests/         Unit tests and sanitized LinkedIn-like fixture
+scripts/       Build, fixture-server, and store-package tooling
+docs/          Product and engineering documentation
+```
 
-## Verification
+## Release validation
 
-`npm run verify` runs strict TypeScript checks, unit and sanitized DOM-fixture tests, and the production build. The fixture coverage includes migration, presets, storage-change handling, untrusted-label escaping, protected anchors, keyword validation/matching/restoration, a 25,000-character description pass, and conservative section recognition.
+`npm run verify` covers settings normalization and migration, presets, storage changes, untrusted-label escaping, selector safety, keyword validation/matching/restoration, a 25,000-character description pass, search-card classification, and conservative section recognition.
 
-## Live DOM validation
-
-LinkedIn can change its markup independently of this extension. Revalidate the conservative selector map against current signed-in job pages before each release.
+Before publishing, also load the unpacked build and validate the selector map against current signed-in LinkedIn job-detail and search views. Automated fixtures cannot guarantee compatibility with markup LinkedIn changes after release.
