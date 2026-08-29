@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JustTheRole Store Showcase</title>
+    <link rel="stylesheet" href="/content.css" />
+    <style>
+      :root { color-scheme: light; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #eef1ef; color: #17201c; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: linear-gradient(135deg, #edf3ef 0%, #f7f5ef 48%, #e9f0ec 100%); }
+      .shell { width: 1180px; margin: 0 auto; padding: 26px 0 60px; }
+      .browser-bar { display: flex; align-items: center; gap: 11px; height: 48px; padding: 0 17px; border: 1px solid #d6ded9; border-radius: 15px 15px 0 0; background: #f8faf9; box-shadow: 0 18px 60px rgb(26 54 41 / .12); }
+      .dot { width: 10px; height: 10px; border-radius: 50%; background: #c6cfca; }
+      .address { flex: 1; margin-left: 8px; padding: 7px 15px; border-radius: 8px; background: #e9eeeb; color: #69756e; font-size: 12px; }
+      .brand-chip { display: flex; align-items: center; gap: 7px; color: #276749; font-size: 12px; font-weight: 750; }
+      .brand-chip img { width: 24px; height: 24px; border-radius: 6px; }
+      .app { min-height: 680px; border: 1px solid #d6ded9; border-top: 0; border-radius: 0 0 15px 15px; background: #f3f2ef; box-shadow: 0 18px 60px rgb(26 54 41 / .12); overflow: hidden; }
+      .site-nav { display: flex; align-items: center; height: 56px; padding: 0 28px; border-bottom: 1px solid #e1e1dc; background: #fff; }
+      .site-mark { display: flex; align-items: center; gap: 11px; color: #214f3c; font-size: 18px; font-weight: 800; }
+      .site-mark span:first-child { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: #276749; color: #fff; }
+      .site-links { display: flex; gap: 22px; margin-left: auto; color: #6a746e; font-size: 12px; }
+      .layout { display: grid; grid-template-columns: 330px minmax(0, 1fr); min-height: 624px; }
+      .jobs-search-results-list { padding: 20px 18px; border-right: 1px solid #e1e1dc; background: #fafaf8; }
+      .list-kicker { margin: 0 0 3px; color: #276749; font-size: 11px; font-weight: 800; letter-spacing: .1em; }
+      .jobs-search-results-list h2 { margin: 0 0 14px; font-size: 21px; }
+      .jobs-search-results-list ul { display: grid; gap: 9px; margin: 0; padding: 0; }
+      .jobs-search-results__list-item { display: grid; grid-template-columns: 42px 1fr; gap: 11px; padding: 13px; border: 1px solid #dddeda; border-radius: 11px; background: #fff; list-style: none; }
+      .jobs-search-results__list-item.selected { border: 2px solid #276749; background: #edf6f0; }
+      .company-avatar { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 10px; background: #e3eee7; color: #276749; font-weight: 850; }
+      .card-copy strong { display: block; margin-bottom: 2px; font-size: 13px; }
+      .card-copy p { margin: 0; color: #65716a; font-size: 11px; line-height: 1.4; }
+      .job-card-container__footer-item, .job-card-container__metadata-item { margin-top: 5px; color: #6c776f; font-size: 10px; font-weight: 700; }
+      .job-pane { padding: 20px 26px 50px; overflow: hidden; }
+      .jobs-details { display: grid; gap: 13px; }
+      .jobs-details > * { padding: 20px; border: 1px solid #e0e1dd; border-radius: 14px; background: #fff; }
+      .job-header { position: relative; }
+      .job-header::after { content: "DEMO ROLE"; position: absolute; top: 18px; right: 18px; padding: 5px 8px; border-radius: 99px; background: #edf6f0; color: #276749; font-size: 10px; font-weight: 800; letter-spacing: .09em; }
+      .job-header h1 { max-width: 570px; margin: 0 0 7px; font-size: 31px; line-height: 1.12; letter-spacing: -.035em; }
+      .company { margin: 0 0 5px; color: #276749; font-weight: 750; }
+      .meta { margin: 0 0 15px; color: #66726b; font-size: 13px; }
+      .actions { display: flex; gap: 9px; }
+      button { min-height: 36px; padding: 7px 14px; border: 1px solid #8e9993; border-radius: 99px; background: #fff; color: #28322d; font: 700 12px/1 inherit; }
+      .jobs-apply-button { border-color: #276749; background: #276749; color: #fff; }
+      .jobs-description { padding: 22px 24px !important; }
+      .jobs-box__html-content { padding: 0; }
+      .jobs-box__html-content h3 { margin: 0 0 6px; font-size: 17px; }
+      .jobs-box__html-content p { margin: 0 0 17px; color: #3f4a45; font-size: 14px; line-height: 1.55; }
+      mark[data-jtr-keyword-type="positive"] { border-bottom-color: #20845b !important; background: #dff5e9 !important; color: #17201c !important; }
+      mark[data-jtr-keyword-type="neutral"] { border-bottom-color: #0a66c2 !important; background: #e1efff !important; color: #17201c !important; }
+      mark[data-jtr-keyword-type="dealbreaker"] { border-color: #b36b00 !important; background: #fff0ce !important; color: #17201c !important; }
+      mark[data-jtr-mark]::after { color: #24312b !important; }
+      .module h2 { margin: 0 0 6px; font-size: 17px; }
+      .module p { margin: 0; color: #65716a; font-size: 13px; }
+      [data-jtr-search-hidden] { display: none !important; }
+    </style>
+    <script>
+      const query = new URLSearchParams(location.search);
+      const searchMode = query.get("view") === "search";
+      const settings = {
+        schemaVersion: 2,
+        enabled: true,
+        activePreset: "balanced",
+        customBasePreset: "balanced",
+        moduleRules: {
+          aiMatch: true, applicantInsights: false, premiumUpsells: true,
+          recommendations: true, footerPromotions: true, applicantCount: false,
+          hiringTeam: false, peopleConnections: false, companyOverview: false,
+          topNavigation: false, searchResultsPane: false
+        },
+        keywordRules: [
+          { id: "desired-1", text: "TypeScript", type: "positive", matchMode: "whole-word", enabled: true },
+          { id: "desired-2", text: "accessibility", type: "positive", matchMode: "whole-word", enabled: true },
+          { id: "check-1", text: "onsite only", type: "dealbreaker", matchMode: "phrase", enabled: true }
+        ],
+        readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
+        searchBeta: { compactDensity: searchMode, collapseViewed: searchMode, collapseApplied: searchMode },
+        syncEnabled: false,
+        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline" }
+      };
+      window.chrome = {
+        storage: {
+          local: { get: async () => ({ settingsV2: settings }), set: async () => {} },
+          sync: { get: async () => ({}), set: async () => {}, remove: async () => {} },
+          onChanged: { addListener: () => {} }
+        },
+        runtime: {
+          onMessage: { addListener: () => {} },
+          openOptionsPage: async () => {},
+          getManifest: () => ({ version: "0.2.0" })
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="browser-bar">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="address">jobs.example.test/search/frontend-engineer</div>
+        <div class="brand-chip"><img src="/icon-128.png" alt="" />JustTheRole active</div>
+      </div>
+      <div class="app">
+        <nav class="site-nav">
+          <div class="site-mark"><span>J</span><span>Jobs</span></div>
+          <div class="site-links"><span>Search</span><span>Saved</span><span>Applications</span><span>Profile</span></div>
+        </nav>
+        <div class="layout">
+          <aside class="jobs-search-results-list">
+            <p class="list-kicker">128 OPPORTUNITIES</p>
+            <h2>Frontend roles</h2>
+            <ul>
+              <li class="jobs-search-results__list-item selected"><div class="company-avatar">AC</div><div class="card-copy"><strong>Senior Frontend Engineer</strong><p>Acme Cloud · Remote</p><p>₹35L–₹48L · Full-time</p></div></li>
+              <li class="jobs-search-results__list-item"><div class="company-avatar">NL</div><div class="card-copy"><strong>Product Engineer</strong><p>North Labs · Bengaluru</p><div class="job-card-container__footer-item">Viewed</div></div></li>
+              <li class="jobs-search-results__list-item"><div class="company-avatar">SF</div><div class="card-copy"><strong>UI Platform Engineer</strong><p>Signal Foundry · Hybrid</p><div class="job-card-container__footer-item">Applied</div></div></li>
+              <li class="jobs-search-results__list-item"><div class="company-avatar">HP</div><div class="card-copy"><strong>Design Systems Lead</strong><p>Harbor Products · Remote</p><div class="job-card-container__footer-item">Promoted</div><div class="job-card-container__metadata-item">Viewed</div></div></li>
+              <li class="jobs-search-results__list-item"><div class="company-avatar">OT</div><div class="card-copy"><strong>Frontend Architect</strong><p>Open Trail · Remote</p></div></li>
+            </ul>
+          </aside>
+          <main class="job-pane">
+            <div class="jobs-details">
+              <header class="job-header">
+                <h1 class="job-details-jobs-unified-top-card__job-title">Senior Frontend Engineer</h1>
+                <p class="company job-details-jobs-unified-top-card__company-name">Acme Cloud</p>
+                <p class="meta">Remote · India · Full-time · Posted 2 days ago</p>
+                <div class="actions"><button class="jobs-apply-button">Apply</button><button class="jobs-save-button">Save</button><button data-control-name="share_job">Share</button></div>
+              </header>
+              <section class="module job-details-how-you-match-card__container"><h2>How your profile matches</h2><p>Automated profile comparison and premium insights.</p></section>
+              <section class="module jobs-premium-job-details-card"><h2>Premium applicant insights</h2><p>See how you compare with other applicants.</p></section>
+              <section class="module jobs-premium-applicant-insights"><h2>Applicant insights</h2><p>Applicants typically have 5+ years of product experience.</p></section>
+              <section id="job-details" class="jobs-description">
+                <div class="jobs-box__html-content">
+                  <h3>About the role</h3>
+                  <p>Build thoughtful, accessible web experiences used by teams around the world.</p>
+                  <h3>Responsibilities</h3>
+                  <p>Lead TypeScript architecture, improve accessibility, and partner closely with design and product.</p>
+                  <h3>Requirements</h3>
+                  <p>Five years of frontend experience. Quarterly planning sessions are onsite only.</p>
+                </div>
+              </section>
+              <section class="module jobs-similar-jobs-list"><h2>Similar jobs</h2><p>More roles selected for you.</p></section>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+    <script src="/content.js"></script>
+  </body>
+</html>

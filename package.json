@@ -9,7 +9,9 @@
     "test": "node --import tsx --test tests/**/*.test.ts",
     "verify": "npm run check && npm test && npm run build",
     "package:store": "npm run verify && node scripts/package-store.mjs",
-    "chrome-extension": "npm run package:store"
+    "chrome-extension": "npm run package:store",
+    "store-assets:preview": "npm run build && node scripts/store-assets-server.mjs",
+    "store-assets:validate": "node scripts/validate-store-assets.mjs"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.287",
