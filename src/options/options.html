@@ -14,12 +14,21 @@
         <p>Choose what stays visible and mark only the criteria you define. Configuration stays local unless you explicitly enable Chrome Sync.</p>
       </header>
 
-      <section class="panel master-panel" aria-labelledby="focus-heading">
-        <div>
-          <h2 id="focus-heading">Focus Mode</h2>
-          <p>Apply your preset and reading tools on supported job pages.</p>
+      <section class="panel master-panel" aria-label="Primary extension controls">
+        <div class="master-setting">
+          <div>
+            <h2>Focus Mode</h2>
+            <p>Apply your preset and reading tools on supported job pages.</p>
+          </div>
+          <label class="switch"><input id="enabled" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Enable Focus Mode</span></label>
         </div>
-        <label class="switch"><input id="enabled" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Enable Focus Mode</span></label>
+        <div class="master-setting">
+          <div>
+            <h2>On-page widget</h2>
+            <p>Show JustTheRole controls above the job details.</p>
+          </div>
+          <label class="switch"><input id="focus-bar-visible" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Show the on-page JustTheRole widget</span></label>
+        </div>
       </section>
 
       <section class="panel" aria-labelledby="preset-heading">
@@ -33,7 +42,7 @@
       <section class="panel" aria-labelledby="modules-heading">
         <div class="section-heading">
           <div><p class="step">02</p><h2 id="modules-heading">Supported page blocks</h2></div>
-          <p>Changing a category creates a Custom preset. About the job is an explicit default-off choice; title and application actions remain protected.</p>
+          <p>Changes create Custom. About the job stays visible by default; titles and application actions stay protected.</p>
         </div>
         <div id="modules" class="setting-list"></div>
       </section>
@@ -46,8 +55,29 @@
         <form id="keyword-form" class="keyword-form">
           <input id="keyword-id" type="hidden" />
           <label class="wide">Word or phrase<input id="keyword-text" type="text" maxlength="60" autocomplete="off" required /></label>
-          <label>Meaning<select id="keyword-type"><option value="positive">Desired</option><option value="neutral">Notice</option><option value="dealbreaker">Check</option></select></label>
-          <label>Match<select id="keyword-mode"><option value="whole-word">Whole word</option><option value="phrase">Exact phrase</option></select></label>
+          <div class="form-field">
+            <span id="keyword-type-label" class="field-label">Meaning</span>
+            <div class="custom-select" data-custom-select="keyword-type">
+              <input id="keyword-type" type="hidden" value="positive" />
+              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-type-label keyword-type-value"><span id="keyword-type-value">Desired</span></button>
+              <div class="select-options" role="listbox" aria-labelledby="keyword-type-label" hidden>
+                <button type="button" role="option" data-value="positive" aria-selected="true">Desired</button>
+                <button type="button" role="option" data-value="neutral" aria-selected="false">Notice</button>
+                <button type="button" role="option" data-value="dealbreaker" aria-selected="false">Check</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-field">
+            <span id="keyword-mode-label" class="field-label">Match</span>
+            <div class="custom-select" data-custom-select="keyword-mode">
+              <input id="keyword-mode" type="hidden" value="whole-word" />
+              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-mode-label keyword-mode-value"><span id="keyword-mode-value">Whole word</span></button>
+              <div class="select-options" role="listbox" aria-labelledby="keyword-mode-label" hidden>
+                <button type="button" role="option" data-value="whole-word" aria-selected="true">Whole word</button>
+                <button type="button" role="option" data-value="phrase" aria-selected="false">Exact phrase</button>
+              </div>
+            </div>
+          </div>
           <button class="primary" type="submit">Save rule</button>
           <button id="cancel-edit" type="button" hidden>Cancel edit</button>
         </form>
@@ -61,7 +91,6 @@
           <div class="setting-list compact">
             <label class="setting"><span><strong>Keyword markers</strong><small>Mark visible employer-written description text.</small></span><input id="keywords-enabled" type="checkbox" /></label>
             <label class="setting"><span><strong>Section navigation</strong><small>Show controls only after two reliable English headings are found.</small></span><input id="sections-enabled" type="checkbox" /></label>
-            <label class="setting"><span><strong>On-page widget</strong><small>Show JustTheRole controls above the job details.</small></span><input id="focus-bar-visible" type="checkbox" /></label>
           </div>
         </div>
         <div>

@@ -95,11 +95,106 @@ function renderModules(): void {
   }
 }
 
+function customSelectRoot(id: string): HTMLElement {
+  return document.querySelector<HTMLElement>(`[data-custom-select='${id}']`)!;
+}
+
+function setCustomSelectValue(id: string, value: string): void {
+  const root = customSelectRoot(id);
+  const input = root.querySelector<HTMLInputElement>(`#${id}`)!;
+  const options = [...root.querySelectorAll<HTMLButtonElement>("[role='option']")];
+  const selected = options.find((option) => option.dataset.value === value) ?? options[0];
+  input.value = selected.dataset.value ?? "";
+  root.querySelector<HTMLElement>(`#${id}-value`)!.textContent = selected.textContent;
+  options.forEach((option) => option.setAttribute("aria-selected", String(option === selected)));
+}
+
+function closeCustomSelect(root: HTMLElement, restoreFocus = false): void {
+  const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
+  root.querySelector<HTMLElement>(".select-options")!.hidden = true;
+  trigger.setAttribute("aria-expanded", "false");
+  if (restoreFocus) trigger.focus();
+}
+
+function closeOtherCustomSelects(current?: HTMLElement): void {
+  document.querySelectorAll<HTMLElement>("[data-custom-select]").forEach((root) => {
+    if (root !== current) closeCustomSelect(root);
+  });
+}
+
+function openCustomSelect(root: HTMLElement, focusLast = false): void {
+  closeOtherCustomSelects(root);
+  const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
+  const menu = root.querySelector<HTMLElement>(".select-options")!;
+  const options = [...menu.querySelectorAll<HTMLButtonElement>("[role='option']")];
+  menu.hidden = false;
+  trigger.setAttribute("aria-expanded", "true");
+  const selected = options.find((option) => option.getAttribute("aria-selected") === "true");
+  (focusLast ? options.at(-1) : selected ?? options[0])?.focus();
+}
+
+function setupCustomSelects(): void {
+  document.querySelectorAll<HTMLElement>("[data-custom-select]").forEach((root) => {
+    const id = root.dataset.customSelect!;
+    const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
+    const menu = root.querySelector<HTMLElement>(".select-options")!;
+    const options = [...menu.querySelectorAll<HTMLButtonElement>("[role='option']")];
+
+    trigger.addEventListener("click", () => {
+      if (menu.hidden) openCustomSelect(root);
+      else closeCustomSelect(root);
+    });
+    trigger.addEventListener("keydown", (event) => {
+      if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+      event.preventDefault();
+      openCustomSelect(root, event.key === "ArrowUp");
+    });
+    options.forEach((option, index) => {
+      option.addEventListener("click", () => {
+        setCustomSelectValue(id, option.dataset.value ?? "");
+        closeCustomSelect(root, true);
+      });
+      option.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          option.click();
+          return;
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeCustomSelect(root, true);
+          return;
+        }
+        if (event.key === "Tab") {
+          closeCustomSelect(root);
+          return;
+        }
+        const targetIndex = event.key === "ArrowDown"
+          ? (index + 1) % options.length
+          : event.key === "ArrowUp"
+            ? (index - 1 + options.length) % options.length
+            : event.key === "Home"
+              ? 0
+              : event.key === "End"
+                ? options.length - 1
+                : -1;
+        if (targetIndex < 0) return;
+        event.preventDefault();
+        options[targetIndex].focus();
+      });
+    });
+  });
+  document.addEventListener("click", (event) => {
+    const current = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-custom-select]") : null;
+    closeOtherCustomSelects(current ?? undefined);
+  });
+}
+
 function resetKeywordForm(): void {
   (document.querySelector<HTMLInputElement>("#keyword-id")!).value = "";
   (document.querySelector<HTMLInputElement>("#keyword-text")!).value = "";
-  (document.querySelector<HTMLSelectElement>("#keyword-type")!).value = "positive";
-  (document.querySelector<HTMLSelectElement>("#keyword-mode")!).value = "whole-word";
+  setCustomSelectValue("keyword-type", "positive");
+  setCustomSelectValue("keyword-mode", "whole-word");
   document.querySelector<HTMLElement>("#cancel-edit")!.hidden = true;
   keywordError.textContent = "";
 }
@@ -107,8 +202,8 @@ function resetKeywordForm(): void {
 function editKeyword(rule: KeywordRule): void {
   (document.querySelector<HTMLInputElement>("#keyword-id")!).value = rule.id;
   (document.querySelector<HTMLInputElement>("#keyword-text")!).value = rule.text;
-  (document.querySelector<HTMLSelectElement>("#keyword-type")!).value = rule.type;
-  (document.querySelector<HTMLSelectElement>("#keyword-mode")!).value = rule.matchMode;
+  setCustomSelectValue("keyword-type", rule.type);
+  setCustomSelectValue("keyword-mode", rule.matchMode);
   document.querySelector<HTMLElement>("#cancel-edit")!.hidden = false;
   document.querySelector<HTMLInputElement>("#keyword-text")!.focus();
 }
@@ -192,8 +287,8 @@ document.querySelector<HTMLFormElement>("#keyword-form")!.addEventListener("subm
   const rule: KeywordRule = {
     id: id || crypto.randomUUID(),
     text: validation.normalizedText,
-    type: document.querySelector<HTMLSelectElement>("#keyword-type")!.value as KeywordType,
-    matchMode: document.querySelector<HTMLSelectElement>("#keyword-mode")!.value as KeywordMatchMode,
+    type: document.querySelector<HTMLInputElement>("#keyword-type")!.value as KeywordType,
+    matchMode: document.querySelector<HTMLInputElement>("#keyword-mode")!.value as KeywordMatchMode,
     enabled: id ? settings.keywordRules.find((item) => item.id === id)?.enabled ?? true : true,
   };
   settings = {
@@ -208,6 +303,7 @@ document.querySelector<HTMLFormElement>("#keyword-form")!.addEventListener("subm
 });
 
 document.querySelector("#cancel-edit")!.addEventListener("click", resetKeywordForm);
+setupCustomSelects();
 bindBoolean("enabled", (checked) => ({ ...settings, enabled: checked }));
 bindBoolean("keywords-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, keywordsEnabled: checked } }));
 bindBoolean("sections-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, sectionControlsEnabled: checked } }));
