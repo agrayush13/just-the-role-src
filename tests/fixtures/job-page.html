@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JustTheRole content fixture</title>
+    <link rel="stylesheet" href="/content.css" />
+    <style>
+      body { max-width: 1100px; margin: 30px auto; padding: 0 20px; background: #f3f2ef; color: #191919; font: 16px/1.5 system-ui, sans-serif; }
+      .layout { display: grid; grid-template-columns: 300px 1fr; gap: 20px; }
+      .jobs-search-results-list, .jobs-details > * { padding: 14px; border-radius: 10px; background: white; }
+      .jobs-details { display: grid; gap: 12px; }
+      .jobs-search-results__list-item { margin-bottom: 8px; list-style: none; border: 1px solid #ddd; border-radius: 8px; }
+      .jobs-box__html-content { padding: 0; }
+      h1, h3, p { margin-top: 0; }
+      button { min-height: 34px; }
+      @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+    </style>
+    <script>
+      const settings = {
+        schemaVersion: 2,
+        enabled: true,
+        activePreset: "balanced",
+        customBasePreset: "balanced",
+        moduleRules: {
+          aiMatch: true, applicantInsights: false, premiumUpsells: true,
+          recommendations: true, footerPromotions: true, applicantCount: false,
+          hiringTeam: false, peopleConnections: false, companyOverview: false,
+          topNavigation: false, searchResultsPane: false
+        },
+        keywordRules: [
+          { id: "desired", text: "TypeScript", type: "positive", matchMode: "whole-word", enabled: true },
+          { id: "check", text: "onsite only", type: "dealbreaker", matchMode: "phrase", enabled: true }
+        ],
+        readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
+        searchBeta: { compactDensity: true, collapseViewed: true, collapseApplied: true },
+        syncEnabled: false,
+        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline" }
+      };
+      window.chrome = {
+        storage: {
+          local: { get: async () => ({ settingsV2: settings }), set: async () => {} },
+          sync: { get: async () => ({}), set: async () => {}, remove: async () => {} },
+          onChanged: { addListener: () => {} }
+        },
+        runtime: {
+          onMessage: { addListener: () => {} },
+          openOptionsPage: async () => {},
+          getManifest: () => ({ version: "0.2.0" })
+        }
+      };
+    </script>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="jobs-search-results-list">
+        <h2>Search results</h2>
+        <ul>
+          <li class="jobs-search-results__list-item"><strong>Viewed role</strong><div class="job-card-container__footer-item">Viewed</div></li>
+          <li class="jobs-search-results__list-item"><strong>Applied role</strong><div class="job-card-container__footer-item">Applied</div></li>
+          <li class="jobs-search-results__list-item"><strong>Sponsored role</strong><div class="job-card-container__footer-item">Promoted</div><div class="job-card-container__metadata-item">Viewed</div></li>
+        </ul>
+      </aside>
+      <main class="jobs-details">
+        <header>
+          <h1 class="job-details-jobs-unified-top-card__job-title">Senior Frontend Engineer</h1>
+          <p class="job-details-jobs-unified-top-card__company-name">Example Company · Remote</p>
+          <button class="jobs-apply-button">Apply</button>
+          <button class="jobs-save-button">Save</button>
+          <button data-control-name="share_job">Share</button>
+        </header>
+        <section class="job-details-how-you-match-card__container"><h2>How you match</h2><p>Generated match content</p></section>
+        <section class="jobs-premium-job-details-card"><h2>Premium</h2><p>Upsell content</p></section>
+        <section class="jobs-premium-applicant-insights"><h2>Applicant insights</h2><p>Useful context</p></section>
+        <section id="job-details" class="jobs-description">
+          <div class="jobs-box__html-content">
+            <h3>Responsibilities</h3>
+            <p>Build accessible products with TypeScript.</p>
+            <h3>Requirements</h3>
+            <p>Five years of experience. This role is onsite only.</p>
+            <p><a href="#apply-info">TypeScript application information</a></p>
+          </div>
+        </section>
+        <section class="jobs-similar-jobs-list"><h2>Similar jobs</h2></section>
+      </main>
+    </div>
+    <script src="/content.js"></script>
+  </body>
+</html>
