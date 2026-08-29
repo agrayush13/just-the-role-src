@@ -8,7 +8,7 @@ export interface ModuleRule {
 
 // Conservative selectors only. Each match is independently safety-checked before hiding.
 // Keep this registry centralized and versioned so LinkedIn changes are easy to audit.
-export const SELECTOR_MAP_VERSION = "2026-08-28.2";
+export const SELECTOR_MAP_VERSION = "2026-08-29.4";
 
 export const MODULE_RULES: readonly ModuleRule[] = [
   {
@@ -17,6 +17,9 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".job-details-how-you-match-card__container",
       ".jobs-details__job-match-card",
+      ".job-assessment",
+      "[id^='JobMatchRef_']",
+      "[data-sdui-component$='.jobMatch']",
       "[data-view-name='job-match-card']",
     ],
   },
@@ -26,6 +29,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".jobs-premium-applicant-insights",
       ".job-details-jobs-unified-top-card__applicant-insights",
+      "[id^='JobDetails_PremiumApplicantInsights_']",
+      "[data-sdui-component$='.premiumApplicantInsightsForJobDetails']",
       "[data-view-name='job-applicant-insights']",
     ],
   },
@@ -35,6 +40,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".jobs-premium-company-growth",
       ".jobs-premium-job-details-card",
+      "[id^='JobDetails_PremiumCompanyInsights_']",
+      "[data-sdui-component$='.premiumCompanyInsightsForJobDetails']",
       "[data-view-name='premium-upsell-card']",
     ],
   },
@@ -44,6 +51,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".jobs-similar-jobs-list",
       ".jobs-recommended-jobs-list",
+      ".similar-jobs",
+      ".people-also-viewed",
       "[data-view-name='similar-jobs-card']",
       "[data-view-name='recommended-jobs-card']",
     ],
@@ -54,6 +63,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".jobs-details__footer",
       ".jobs-details__promoted-jobs",
+      ".job-alert-redirect-section",
+      ".similar-searches",
       "[data-view-name='job-details-footer-promo']",
     ],
   },
@@ -79,6 +90,9 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectable: true,
     selectors: [
       ".jobs-company__box",
+      ".find-a-referral",
+      "[id^='JobDetailsPeopleWhoCanHelpSlot_']",
+      "[data-sdui-component$='.peopleWhoCanHelp']",
       "[data-view-name='job-connections-card']",
       "[data-view-name='job-school-connections-card']",
     ],
@@ -89,6 +103,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     selectors: [
       ".jobs-company",
       ".jobs-company__card",
+      "[id^='JobDetails_AboutTheCompany_']",
+      "[data-sdui-component$='.aboutTheCompanyForJobDetails']",
       "[data-view-name='job-company-card']",
     ],
   },
@@ -113,19 +129,32 @@ export const JOB_ROOT_SELECTORS = [
   ".jobs-search__job-details",
   ".jobs-details",
   ".job-view-layout",
+  ".core-rail",
+  "[data-sdui-screen='com.linkedin.sdui.flagshipnav.jobs.SemanticJobDetails']",
 ] as const;
 
 export const TITLE_SELECTORS = [
   ".job-details-jobs-unified-top-card__job-title",
   ".jobs-unified-top-card__job-title",
+  ".top-card-layout__title",
   "[data-view-name='job-title']",
+  "[data-sdui-screen='com.linkedin.sdui.flagshipnav.jobs.SemanticJobDetails'] a[href*='/jobs/view/']",
 ] as const;
 
 export const DESCRIPTION_SELECTORS = [
   "#job-details",
   ".jobs-description",
+  ".description",
   ".jobs-box__html-content",
   "[data-view-name='job-description']",
+  "[id^='JobDetails_AboutTheJob_']",
+  "[data-sdui-component$='.aboutTheJob']",
+] as const;
+
+export const DESCRIPTION_CONTENT_SELECTORS = [
+  ".jobs-box__html-content",
+  ".show-more-less-html__markup",
+  "[data-sdui-component$='.aboutTheJob']",
 ] as const;
 
 export const PROTECTED_SELECTORS = [
@@ -133,6 +162,9 @@ export const PROTECTED_SELECTORS = [
   ...DESCRIPTION_SELECTORS,
   ".jobs-apply-button",
   ".jobs-save-button",
+  "a[aria-label='Apply on company website']",
+  "button[aria-label='Apply']",
+  "button[aria-label='Save the job']",
   ".job-details-jobs-unified-top-card__company-name",
   ".job-details-jobs-unified-top-card__primary-description-container",
   "[data-view-name='job-company-name']",

@@ -15,6 +15,8 @@ Focus Mode is off on a fresh install. After the user enables it, JustTheRole app
 
 On a supported job detail view, the in-page Focus Bar lets the user switch views without reloading, temporarily show the original page, undo the latest view change, restore the preset behind a Custom view, and open a safe page-block picker. Core content and actions—including the title, company/location context, description, Apply, Save, Share, and Report—are protected from hiding.
 
+Opening the toolbar popup can also activate the bundled content script and stylesheet on an already-open LinkedIn Jobs tab. This covers installation and extension-reload cases without requiring the user to refresh the job page.
+
 Optional reading tools provide:
 
 - Local **Desired**, **Notice**, and **Check** keyword markers using whole-word or exact-phrase matching.
@@ -26,7 +28,7 @@ Optional reading tools provide:
 
 Only extension configuration is stored: the Focus Mode switch, selected view, module choices, keyword rules, reading-tool preferences, search-list preferences, and UI preferences. Chrome Sync is optional and off by default. When enabled, the same configuration—including potentially sensitive keyword rules—may be synchronized through the user's Chrome account; the local copy remains available if Sync fails.
 
-JustTheRole does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests only Chrome storage and narrowly scoped access to `https://www.linkedin.com/jobs/*`.
+JustTheRole does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests Chrome storage, narrowly scoped LinkedIn Jobs access, and user-initiated active-tab scripting so the packaged code can activate on an already-open job tab. The content script does not run on non-Jobs paths.
 
 LinkedIn can change its DOM independently. Selectors are centralized and versioned, every candidate is safety-checked independently, and unrecognized structures fail open by remaining visible. Disabling Focus Mode or choosing **Show original** removes all DOM changes made by the extension.
 

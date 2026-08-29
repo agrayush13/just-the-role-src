@@ -22,8 +22,9 @@ JustTheRole does not sell user data, use data for advertising, transfer data to 
 
 ## Permissions
 
-- **LinkedIn Jobs page access:** Used only to run the bundled content script and stylesheet on `https://www.linkedin.com/jobs/*`, where the extension applies the user's reversible display and reading preferences.
+- **LinkedIn Jobs page access:** Used only to run the bundled content script and stylesheet on LinkedIn Jobs paths (`https://*.linkedin.com/jobs/*`), including regional LinkedIn hosts, where the extension applies the user's reversible display and reading preferences.
 - **Storage:** Used only to save the extension configuration locally and, when explicitly enabled by the user, through Chrome Sync.
+- **Active tab and scripting:** Used only after the user opens the extension popup, to activate the packaged content script and stylesheet on the current LinkedIn Jobs tab when they are not already running. This does not provide background access to other tabs and does not load remote code.
 
 ## Limited Use
 

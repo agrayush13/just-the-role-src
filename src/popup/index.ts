@@ -8,6 +8,8 @@ import {
   type Preset,
   type Settings,
 } from "../shared/settings";
+import { isSupportedLinkedInJobsUrl } from "../shared/urls";
+import { SELECTOR_MAP_VERSION } from "../content/registry";
 
 interface ContentStatus {
   pageStatus: "supported" | "unsupported" | "waiting";
@@ -27,6 +29,8 @@ interface ContentStatus {
 
 let settings: Settings;
 let contentStatus: ContentStatus | null = null;
+let activatedWithoutReload = false;
+let activationFailed = false;
 
 const masterToggle = document.querySelector<HTMLInputElement>("#master-toggle")!;
 const presetSelect = document.querySelector<HTMLSelectElement>("#preset")!;
@@ -41,8 +45,17 @@ function render(): void {
   if (customOption) customOption.disabled = settings.activePreset !== "custom";
   const counts = contentStatus?.keywordCounts;
   const total = counts ? counts.positive + counts.neutral + counts.dealbreaker : 0;
-  matchSummary.textContent = total
-    ? `${total} keyword match${total === 1 ? "" : "es"} · ${contentStatus?.diagnostics.sectionCount ?? 0} recognized sections`
+  const hiddenBlocks = Object.values(contentStatus?.matchedCounts ?? {}).reduce(
+    (sum: number, count) => sum + (count ?? 0),
+    0,
+  );
+  const detectedBlocks = contentStatus?.diagnostics.detectedModuleIds.length ?? 0;
+  matchSummary.textContent = contentStatus?.pageStatus === "supported"
+    ? hiddenBlocks
+      ? `${hiddenBlocks} optional block${hiddenBlocks === 1 ? "" : "s"} hidden · ${total} keyword match${total === 1 ? "" : "es"}`
+      : detectedBlocks
+        ? `${detectedBlocks} optional block type${detectedBlocks === 1 ? "" : "s"} detected; none hidden by this view`
+        : "No supported optional blocks detected on this page"
     : "Keyword and section tools follow your full settings.";
 }
 
@@ -56,15 +69,39 @@ async function persist(): Promise<void> {
   window.setTimeout(() => { feedback.textContent = ""; }, 1200);
 }
 
+async function requestTabStatus(tabId: number): Promise<ContentStatus | null> {
+  try {
+    return await chrome.tabs.sendMessage(tabId, { type: "JTR_GET_STATUS" });
+  } catch {
+    return null;
+  }
+}
+
 async function getActiveTabStatus(): Promise<ContentStatus | null> {
   if (typeof chrome === "undefined" || !chrome.tabs) return null;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return null;
+
+  let status = await requestTabStatus(tab.id);
+  const needsCurrentScript = !status || status.selectorMapVersion !== SELECTOR_MAP_VERSION;
+  if (!needsCurrentScript || !isSupportedLinkedInJobsUrl(tab.url)) return status;
+
   try {
-    return await chrome.tabs.sendMessage(tab.id, { type: "JTR_GET_STATUS" });
+    await chrome.scripting.insertCSS({ target: { tabId: tab.id }, files: ["content.css"] });
+    await chrome.scripting.executeScript({ target: { tabId: tab.id }, files: ["content.js"] });
+    activatedWithoutReload = true;
   } catch {
-    return null;
+    activationFailed = true;
+    return status;
   }
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    status = await requestTabStatus(tab.id);
+    if (status?.selectorMapVersion === SELECTOR_MAP_VERSION) return status;
+    await new Promise((resolve) => window.setTimeout(resolve, 40));
+  }
+  activationFailed = true;
+  return status;
 }
 
 masterToggle.addEventListener("change", async () => {
@@ -117,6 +154,11 @@ async function start(): Promise<void> {
     feedback.textContent = "Settings storage is unavailable; showing safe defaults.";
   }
   contentStatus = await getActiveTabStatus();
+  if (activationFailed) {
+    feedback.textContent = "Could not activate on this tab. Check the extension error log and try again.";
+  } else if (activatedWithoutReload) {
+    feedback.textContent = "Activated on this tab without reloading";
+  }
   pageStatus.textContent =
     contentStatus?.pageStatus === "supported"
       ? contentStatus.temporaryOriginal

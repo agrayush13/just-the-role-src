@@ -17,15 +17,17 @@ import {
   type Settings,
 } from "../shared/settings";
 import {
+  DESCRIPTION_CONTENT_SELECTORS,
   DESCRIPTION_SELECTORS,
   JOB_ROOT_SELECTORS,
   MODULE_RULES,
   SELECTOR_MAP_VERSION,
   TITLE_SELECTORS,
-  isSafeCandidate,
 } from "./registry";
 import { highlightDescriptionText, KEYWORD_MARK_ATTR, restoreKeywordHighlights } from "./keyword-dom";
 import { isSponsoredLabel, recognizedCardStatus } from "./search-beta";
+import { isRendered } from "./visibility";
+import { resolveSafeModuleCandidates } from "./candidates";
 
 const CONTROL_HOST_ID = "just-the-role-control";
 const HIDDEN_ATTR = "data-jtr-hidden";
@@ -93,23 +95,16 @@ function allMatches(selectors: readonly string[], root: ParentNode = document): 
   return [...matches];
 }
 
-function isRendered(element: Element): boolean {
-  if (!element.isConnected || element.closest("[hidden], [aria-hidden='true']")) return false;
-  const style = getComputedStyle(element);
-  return style.display !== "none" && style.visibility !== "hidden" && element.getClientRects().length > 0;
-}
-
 function detectJobView(): JobView | null {
   if (!location.pathname.startsWith("/jobs")) return null;
-  const roots = allMatches(JOB_ROOT_SELECTORS).filter(isRendered).reverse();
+  const roots = allMatches(JOB_ROOT_SELECTORS).filter((root) => isRendered(root)).reverse();
   for (const root of roots) {
     const title = firstMatch(TITLE_SELECTORS, root);
     const description = firstMatch(DESCRIPTION_SELECTORS, root);
     if (!title || !description || !isRendered(title) || !isRendered(description)) continue;
-    const descriptionContent =
-      description.matches(".jobs-box__html-content")
-        ? description
-        : description.querySelector(".jobs-box__html-content") ?? description;
+    const descriptionContent = DESCRIPTION_CONTENT_SELECTORS.some((selector) => description.matches(selector))
+      ? description
+      : firstMatch(DESCRIPTION_CONTENT_SELECTORS, description) ?? description;
     return { root, title, description, descriptionContent };
   }
   return null;
@@ -268,11 +263,12 @@ function collectCandidates(view: JobView): Map<CategoryKey, HTMLElement[]> {
   for (const rule of MODULE_RULES.filter((item) => item.selectable)) {
     const matches = new Set<HTMLElement>();
     for (const selector of rule.selectors) {
-      document.querySelectorAll<HTMLElement>(selector).forEach((candidate) => {
-        if (isSafeCandidate(candidate, view.root)) matches.add(candidate);
-      });
+      document.querySelectorAll<HTMLElement>(selector).forEach((candidate) => matches.add(candidate));
     }
-    if (matches.size) candidates.set(rule.category, [...matches]);
+    const safeMatches = resolveSafeModuleCandidates(matches, view.root).filter(
+      (candidate): candidate is HTMLElement => candidate instanceof HTMLElement,
+    );
+    if (safeMatches.length) candidates.set(rule.category, safeMatches);
   }
   return candidates;
 }
@@ -397,6 +393,12 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
   const pickerList = [...(candidates ?? collectCandidates(view))]
     .map(([category, elements]) => `<button type="button" data-action="candidate" data-category="${category}">${settings.moduleRules[category] ? "Show" : "Hide"} ${CATEGORY_LABELS[category]} (${elements.length})</button>`)
     .join("");
+  const hiddenBlockCount = Object.values(matchedCounts).reduce((total, count) => total + (count ?? 0), 0);
+  const normalStatus = hiddenBlockCount
+    ? `${hiddenBlockCount} optional block${hiddenBlockCount === 1 ? "" : "s"} hidden.`
+    : diagnostics.detectedModuleIds.length
+      ? "No detected blocks are hidden in this view."
+      : "No supported optional blocks were detected on this page.";
 
   shadow.innerHTML = `
     <style>${controlStyles()}</style>
@@ -417,7 +419,7 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
       ${nav ? `<nav class="nav" aria-label="Job description sections"><span class="label">Jump to</span>${nav}</nav>` : ""}
       ${countSummary ? `<div class="counts" aria-label="Keyword match counts"><span class="label">Matches</span>${countSummary}</div>` : ""}
       ${(settings.searchBeta.collapseViewed && searchCounts.viewed) || (settings.searchBeta.collapseApplied && searchCounts.applied) ? `<div class="search"><span class="label">Search list</span>${settings.searchBeta.collapseViewed && searchCounts.viewed ? `<button type="button" data-action="show-viewed">${showViewed ? "Hide" : "Show"} viewed (${searchCounts.viewed})</button>` : ""}${settings.searchBeta.collapseApplied && searchCounts.applied ? `<button type="button" data-action="show-applied">${showApplied ? "Hide" : "Show"} applied (${searchCounts.applied})</button>` : ""}</div>` : ""}
-      <p class="status" aria-live="polite">${pickerActive ? "Choose an outlined block or use the accessible list. Press Escape to cancel." : temporaryOriginal ? "Original page shown for this job session." : ""}</p>
+      <p class="status" aria-live="polite">${pickerActive ? "Choose an outlined block or use the accessible list. Press Escape to cancel." : temporaryOriginal ? "Original page shown for this job session." : normalStatus}</p>
     </section>
     <dialog aria-labelledby="jtr-picker-title">
       <div class="dialog-inner">
@@ -487,15 +489,15 @@ function applyLayout(view: JobView): void {
   for (const rule of MODULE_RULES) {
     const matches = new Set<Element>();
     for (const selector of rule.selectors) document.querySelectorAll(selector).forEach((element) => matches.add(element));
-    if (matches.size) detected.add(rule.category);
+    const safeMatches = resolveSafeModuleCandidates(matches, view.root).filter(
+      (candidate): candidate is HTMLElement => candidate instanceof HTMLElement,
+    );
+    if (safeMatches.length) detected.add(rule.category);
     if (!settings.moduleRules[rule.category]) continue;
-    let safeCount = 0;
-    for (const candidate of matches) {
-      if (!(candidate instanceof HTMLElement) || !isSafeCandidate(candidate, view.root)) continue;
+    for (const candidate of safeMatches) {
       hideElement(candidate, rule.category);
-      safeCount += 1;
     }
-    if (safeCount) matchedCounts[rule.category] = safeCount;
+    if (safeMatches.length) matchedCounts[rule.category] = safeMatches.length;
   }
   diagnostics.detectedModuleIds = [...detected];
 }
