@@ -1,0 +1,91 @@
+html[data-jtr-active="true"] {
+  scroll-behavior: auto !important;
+}
+
+[data-jtr-hidden="true"] {
+  display: none !important;
+}
+
+.jtr-control {
+  box-sizing: border-box;
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
+  border-radius: 10px;
+  background: Canvas;
+  color: CanvasText;
+  font: 600 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.jtr-control__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.jtr-control__brand {
+  margin-right: auto;
+  letter-spacing: -0.01em;
+}
+
+.jtr-toggle,
+.jtr-link-button {
+  min-height: 36px;
+  border-radius: 18px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.jtr-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border: 1px solid #0a66c2;
+  background: transparent;
+  color: #0a66c2;
+}
+
+.jtr-toggle[data-active="true"] {
+  background: #0a66c2;
+  color: #fff;
+}
+
+.jtr-toggle__icon {
+  font-size: 17px;
+  line-height: 1;
+}
+
+.jtr-link-button {
+  padding: 6px 10px;
+  border: 0;
+  background: transparent;
+  color: LinkText;
+  text-decoration: underline;
+}
+
+.jtr-toggle:focus-visible,
+.jtr-link-button:focus-visible {
+  outline: 3px solid #70b5f9;
+  outline-offset: 2px;
+}
+
+.jtr-control__status:empty {
+  display: none;
+}
+
+.jtr-control__status {
+  margin: 7px 0 0;
+  color: GrayText;
+  font-weight: 400;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jtr-control *,
+  .jtr-control *::before,
+  .jtr-control *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
