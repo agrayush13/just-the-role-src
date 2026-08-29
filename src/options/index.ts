@@ -1,10 +1,14 @@
 import { validateKeywordRule } from "../shared/keywords";
+import { bindSelectMenu, type SelectMenuController } from "../shared/select-menu";
 import {
   CATEGORY_KEYS,
   CATEGORY_LABELS,
   DEFAULT_SETTINGS,
+  SETTINGS_KEY,
   customizeModule,
+  enableSettingsSync,
   loadSettings,
+  normalizeSettings,
   saveSettings,
   settingsForPreset,
   type CategoryKey,
@@ -18,6 +22,9 @@ import {
 let settings: Settings;
 const feedback = document.querySelector<HTMLElement>("#feedback")!;
 const keywordError = document.querySelector<HTMLElement>("#keyword-error")!;
+const customSelects = new Map<string, SelectMenuController>();
+const masterState = document.querySelector<HTMLElement>("#options-master-state")!;
+const widgetOffNote = document.querySelector<HTMLElement>("#options-widget-off-note")!;
 
 const presetDescriptions: Record<Exclude<Preset, "custom">, string> = {
   balanced: "Hides match, upsell, recommendation, and promotion modules while keeping useful context.",
@@ -61,12 +68,16 @@ function renderPresets(): void {
   custom.className = "preset-card";
   custom.setAttribute("role", "radio");
   custom.setAttribute("aria-checked", String(settings.activePreset === "custom"));
-  custom.disabled = settings.activePreset !== "custom";
   const customTitle = document.createElement("strong");
   customTitle.textContent = "Custom";
   const customDetail = document.createElement("span");
-  customDetail.textContent = "Your saved category-level choices. Created automatically after a change.";
+  customDetail.textContent = "Your saved page-block choices, independent of the preset selected before it.";
   custom.append(customTitle, customDetail);
+  custom.addEventListener("click", async () => {
+    settings = settingsForPreset(settings, "custom");
+    renderAll();
+    await persist("Custom preset selected");
+  });
   root.append(custom);
 }
 
@@ -95,98 +106,13 @@ function renderModules(): void {
   }
 }
 
-function customSelectRoot(id: string): HTMLElement {
-  return document.querySelector<HTMLElement>(`[data-custom-select='${id}']`)!;
-}
-
 function setCustomSelectValue(id: string, value: string): void {
-  const root = customSelectRoot(id);
-  const input = root.querySelector<HTMLInputElement>(`#${id}`)!;
-  const options = [...root.querySelectorAll<HTMLButtonElement>("[role='option']")];
-  const selected = options.find((option) => option.dataset.value === value) ?? options[0];
-  input.value = selected.dataset.value ?? "";
-  root.querySelector<HTMLElement>(`#${id}-value`)!.textContent = selected.textContent;
-  options.forEach((option) => option.setAttribute("aria-selected", String(option === selected)));
-}
-
-function closeCustomSelect(root: HTMLElement, restoreFocus = false): void {
-  const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
-  root.querySelector<HTMLElement>(".select-options")!.hidden = true;
-  trigger.setAttribute("aria-expanded", "false");
-  if (restoreFocus) trigger.focus();
-}
-
-function closeOtherCustomSelects(current?: HTMLElement): void {
-  document.querySelectorAll<HTMLElement>("[data-custom-select]").forEach((root) => {
-    if (root !== current) closeCustomSelect(root);
-  });
-}
-
-function openCustomSelect(root: HTMLElement, focusLast = false): void {
-  closeOtherCustomSelects(root);
-  const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
-  const menu = root.querySelector<HTMLElement>(".select-options")!;
-  const options = [...menu.querySelectorAll<HTMLButtonElement>("[role='option']")];
-  menu.hidden = false;
-  trigger.setAttribute("aria-expanded", "true");
-  const selected = options.find((option) => option.getAttribute("aria-selected") === "true");
-  (focusLast ? options.at(-1) : selected ?? options[0])?.focus();
+  customSelects.get(id)?.setValue(value);
 }
 
 function setupCustomSelects(): void {
   document.querySelectorAll<HTMLElement>("[data-custom-select]").forEach((root) => {
-    const id = root.dataset.customSelect!;
-    const trigger = root.querySelector<HTMLButtonElement>(".select-trigger")!;
-    const menu = root.querySelector<HTMLElement>(".select-options")!;
-    const options = [...menu.querySelectorAll<HTMLButtonElement>("[role='option']")];
-
-    trigger.addEventListener("click", () => {
-      if (menu.hidden) openCustomSelect(root);
-      else closeCustomSelect(root);
-    });
-    trigger.addEventListener("keydown", (event) => {
-      if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
-      event.preventDefault();
-      openCustomSelect(root, event.key === "ArrowUp");
-    });
-    options.forEach((option, index) => {
-      option.addEventListener("click", () => {
-        setCustomSelectValue(id, option.dataset.value ?? "");
-        closeCustomSelect(root, true);
-      });
-      option.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          option.click();
-          return;
-        }
-        if (event.key === "Escape") {
-          event.preventDefault();
-          closeCustomSelect(root, true);
-          return;
-        }
-        if (event.key === "Tab") {
-          closeCustomSelect(root);
-          return;
-        }
-        const targetIndex = event.key === "ArrowDown"
-          ? (index + 1) % options.length
-          : event.key === "ArrowUp"
-            ? (index - 1 + options.length) % options.length
-            : event.key === "Home"
-              ? 0
-              : event.key === "End"
-                ? options.length - 1
-                : -1;
-        if (targetIndex < 0) return;
-        event.preventDefault();
-        options[targetIndex].focus();
-      });
-    });
-  });
-  document.addEventListener("click", (event) => {
-    const current = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-custom-select]") : null;
-    closeOtherCustomSelects(current ?? undefined);
+    customSelects.set(root.dataset.customSelect!, bindSelectMenu(root));
   });
 }
 
@@ -257,6 +183,11 @@ function setCheckbox(id: string, value: boolean): void {
   document.querySelector<HTMLInputElement>(`#${id}`)!.checked = value;
 }
 
+function renderStateIndicators(): void {
+  masterState.textContent = settings.enabled ? "On" : "Off";
+  widgetOffNote.hidden = settings.enabled || !settings.uiPreferences.focusBarVisible;
+}
+
 function renderAll(): void {
   setCheckbox("enabled", settings.enabled);
   setCheckbox("keywords-enabled", settings.readingTools.keywordsEnabled);
@@ -266,6 +197,7 @@ function renderAll(): void {
   setCheckbox("compact-density", settings.searchBeta.compactDensity);
   setCheckbox("collapse-viewed", settings.searchBeta.collapseViewed);
   setCheckbox("collapse-applied", settings.searchBeta.collapseApplied);
+  renderStateIndicators();
   renderPresets();
   renderModules();
   renderKeywords();
@@ -274,6 +206,7 @@ function renderAll(): void {
 function bindBoolean(id: string, update: (checked: boolean) => Settings): void {
   document.querySelector<HTMLInputElement>(`#${id}`)!.addEventListener("change", async (event) => {
     settings = update((event.currentTarget as HTMLInputElement).checked);
+    renderStateIndicators();
     await persist();
   });
 }
@@ -308,7 +241,29 @@ bindBoolean("enabled", (checked) => ({ ...settings, enabled: checked }));
 bindBoolean("keywords-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, keywordsEnabled: checked } }));
 bindBoolean("sections-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, sectionControlsEnabled: checked } }));
 bindBoolean("focus-bar-visible", (checked) => ({ ...settings, uiPreferences: { ...settings.uiPreferences, focusBarVisible: checked } }));
-bindBoolean("sync-enabled", (checked) => ({ ...settings, syncEnabled: checked }));
+document.querySelector<HTMLInputElement>("#sync-enabled")!.addEventListener("change", async (event) => {
+  const checked = (event.currentTarget as HTMLInputElement).checked;
+  if (!checked) {
+    settings = { ...settings, syncEnabled: false };
+    await persist("Sync disabled; local settings retained");
+    return;
+  }
+  try {
+    const result = await enableSettingsSync(settings);
+    settings = result.settings;
+    renderAll();
+    feedback.textContent = result.syncError
+      ? `Saved locally. Sync unavailable: ${result.syncError}`
+      : result.imported
+        ? "Existing Chrome Sync configuration loaded"
+        : "Chrome Sync enabled";
+  } catch {
+    settings = { ...settings, syncEnabled: false };
+    renderAll();
+    feedback.textContent = "Could not enable Chrome Sync. Local settings were retained.";
+  }
+  window.setTimeout(() => { feedback.textContent = ""; }, 2500);
+});
 bindBoolean("compact-density", (checked) => ({ ...settings, searchBeta: { ...settings.searchBeta, compactDensity: checked } }));
 bindBoolean("collapse-viewed", (checked) => ({ ...settings, searchBeta: { ...settings.searchBeta, collapseViewed: checked } }));
 bindBoolean("collapse-applied", (checked) => ({ ...settings, searchBeta: { ...settings.searchBeta, collapseApplied: checked } }));
@@ -328,6 +283,11 @@ async function start(): Promise<void> {
     feedback.textContent = "Settings storage is unavailable; showing safe defaults.";
   }
   renderAll();
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local" || !changes[SETTINGS_KEY]?.newValue) return;
+    settings = normalizeSettings(changes[SETTINGS_KEY].newValue);
+    renderAll();
+  });
 }
 
 void start();

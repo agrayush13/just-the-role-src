@@ -2,7 +2,7 @@
 
 ## System boundary
 
-JustTheRole is a Manifest V3 Chrome extension with no background worker and no server component. It consists of a LinkedIn Jobs content script, toolbar popup, options page, shared deterministic logic, static styles, and a packaged privacy page.
+JUSTTHEROLE is a Manifest V3 Chrome extension with no server component. It consists of a LinkedIn Jobs content script, toolbar popup, options page, a minimal install-event service worker, shared deterministic logic, static styles, and a packaged privacy page.
 
 ```text
 Chrome storage.local ───────┐
@@ -30,8 +30,9 @@ Chrome storage.sync (opt-in)┘            │
 - `src/content/keyword-dom.ts` adds and restores markers without replacing description HTML.
 - `src/content/search-beta.ts` classifies explicit card labels.
 - `src/content/index.ts` coordinates detection, transformations, restoration, navigation changes, DOM updates, and the Focus Bar.
-- `src/popup/` provides quick controls and privacy-safe status diagnostics.
+- `src/popup/` provides compact quick controls, settings access, and a secondary privacy-safe diagnostics action.
 - `src/options/` provides complete configuration editing.
+- `src/background/` opens the existing settings page once after a fresh installation and performs no work on updates or browser startup.
 - `scripts/build.mjs` bundles entry points and copies static assets.
 - `scripts/package-store.mjs` produces and validates the store archive.
 
@@ -45,7 +46,7 @@ Each apply pass:
 2. detects a rendered job root, title, and description from the restored page;
 3. resets transient diagnostics;
 4. when Focus Mode is active and original view is not requested, applies layout rules, keyword markers, section controls, and search cleanup;
-5. renders or removes the Focus Bar;
+5. renders the Focus Bar whenever its independent visibility preference is enabled, including an Enable action when Focus Mode is off, or removes it when the preference is disabled;
 6. restores scroll position and clears observer records created by the pass.
 
 Relevant page mutations are debounced. Mutations inside extension UI or keyword markers are ignored to prevent feedback loops. Route changes clear session-only state such as Show original, Undo, collapsed sections, and revealed search cards.
@@ -62,15 +63,15 @@ Section and search transformations also use extension-owned data attributes. No 
 
 ## Focus Bar isolation
 
-The Focus Bar is a single host inserted before the first recognized AI/profile-match module, with the description as its fallback anchor. Its open Shadow DOM contains scoped styles, extension theme tokens, the packaged 32px logo, and native controls. The content script derives a light/dark mode from the nearest opaque page background and watches page theme attributes so the palette stays aligned with LinkedIn. Employer-provided section labels are escaped before template interpolation. The host and injected controls carry extension-owned markers so mutation handling and highlighting exclude them.
+The Focus Bar is a single host inserted before the first recognized AI/profile-match module, with the description as its fallback anchor. Its open Shadow DOM contains scoped styles, extension theme tokens, the packaged 32px logo, native buttons, and the shared ARIA listbox dropdown behavior. The content script derives a light/dark mode from the nearest opaque page background and watches page theme attributes so the palette stays aligned with LinkedIn. Employer-provided section labels are escaped before template interpolation. The host and injected controls carry extension-owned markers so mutation handling and highlighting exclude them.
 
-`uiPreferences.focusBarVisible` controls only host rendering. Page transformations continue when the host is hidden, and storage changes restore it immediately without requiring a page reload.
+`uiPreferences.focusBarVisible` controls only host rendering. Page transformations continue when the host is hidden. When Focus Mode is disabled but this preference remains enabled, the host stays visible with a direct activation action while all LinkedIn content transformations remain restored. Storage changes update it immediately without requiring a page reload.
 
 ## Settings and messaging
 
-Local storage is the durable baseline. Enabling Sync writes the normalized settings to local and `chrome.storage.sync`; failures are returned to the UI while the local save remains intact. Disabling Sync removes the synced copy when possible.
+Local storage is the durable baseline. Enabling Sync imports an existing opted-in cloud configuration when present; otherwise it writes the normalized local settings to `chrome.storage.sync`. Failures are returned to the UI while the local save remains intact. Disabling Sync removes the synced copy when possible.
 
-Storage events update open job pages immediately. Sync events are ignored unless the current local configuration has Sync enabled. The popup requests an ephemeral status snapshot containing category IDs, aggregate counts, timings, versions, and route type—but no job text, keyword text, page URL, or account data.
+Storage events update open job pages immediately. The background worker mirrors accepted Sync events into local storage so the fallback and open extension surfaces stay current. Sync events are ignored unless the current local configuration has Sync enabled. The popup requests an ephemeral status snapshot containing category IDs, aggregate counts, timings, versions, and route type—but no job text, keyword text, page URL, or account data.
 
 ## Security and privacy properties
 

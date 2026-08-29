@@ -6,7 +6,7 @@ These answers reflect the extension code in this repository. Keep the dashboard 
 
 ### Single purpose description
 
-> JustTheRole provides a user-controlled focus and reading layer on LinkedIn Jobs pages by hiding selected recognized page blocks and locally highlighting user-defined criteria while preserving the title, company context, and application actions.
+> JUSTTHEROLE provides a user-controlled focus and reading layer on LinkedIn Jobs pages by hiding selected recognized page blocks and locally highlighting user-defined criteria while preserving the title, company context, and application actions.
 
 ### Host permission justification
 
@@ -18,11 +18,11 @@ These answers reflect the extension code in this repository. Keep the dashboard 
 
 ### Active tab permission justification
 
-> The activeTab permission is used only when the user opens the JustTheRole toolbar popup. It grants temporary access to the current tab so the extension can activate on an already-open LinkedIn Jobs page after installation or an extension update without requiring a page refresh. It is not used to inspect other tabs or browsing history.
+> The activeTab permission is used only when the user opens the JUSTTHEROLE toolbar popup. It grants temporary access to the current tab so the extension can activate on an already-open LinkedIn Jobs page after installation or an extension update without requiring a page refresh. It is not used to inspect other tabs or browsing history.
 
 ### Scripting permission justification
 
-> The scripting permission is used only with activeTab to inject JustTheRole's packaged content.js and content.css files into the current LinkedIn Jobs tab when the static content script is missing or stale. No remote code, downloaded logic, or arbitrary strings are executed.
+> The scripting permission is used only with activeTab to inject JUSTTHEROLE's packaged content.js and content.css files into the current LinkedIn Jobs tab when the static content script is missing or stale. No remote code, downloaded logic, or arbitrary strings are executed.
 
 ### Remote code
 
@@ -30,7 +30,7 @@ Select **No, I am not using remote code**.
 
 If the dashboard presents an explanation field, use:
 
-> JustTheRole does not use remote code. All JavaScript, CSS, and dependencies are bundled inside the submitted extension package. It does not load external scripts, evaluate downloaded strings, or fetch remote configuration or logic, and it makes no extension-initiated network requests.
+> JUSTTHEROLE does not use remote code. All JavaScript, CSS, and dependencies are bundled inside the submitted extension package. It does not load external scripts, evaluate downloaded strings, or fetch remote configuration or logic, and it makes no extension-initiated network requests.
 
 ### Data-use disclosure
 

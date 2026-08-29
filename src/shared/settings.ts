@@ -36,6 +36,7 @@ export interface Settings {
   activePreset: Preset;
   customBasePreset: Exclude<Preset, "custom">;
   moduleRules: Record<CategoryKey, boolean>;
+  customModuleRules: Record<CategoryKey, boolean>;
   keywordRules: KeywordRule[];
   readingTools: { keywordsEnabled: boolean; sectionControlsEnabled: boolean };
   searchBeta: { compactDensity: boolean; collapseViewed: boolean; collapseApplied: boolean };
@@ -48,6 +49,10 @@ export interface Settings {
 }
 
 export interface SaveResult { syncError?: string }
+export interface EnableSyncResult extends SaveResult {
+  settings: Settings;
+  imported: boolean;
+}
 
 export function shouldReduceMotion(
   preference: Settings["uiPreferences"]["reducedMotion"],
@@ -111,6 +116,7 @@ export const DEFAULT_SETTINGS: Settings = {
   activePreset: "balanced",
   customBasePreset: "balanced",
   moduleRules: structuredClone(BALANCED_RULES),
+  customModuleRules: structuredClone(BALANCED_RULES),
   keywordRules: [],
   readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
   searchBeta: { compactDensity: false, collapseViewed: false, collapseApplied: false },
@@ -142,12 +148,14 @@ function normalizeModuleRules(
 
 export function migrateLegacySettings(value: unknown): Settings {
   const legacy = value && typeof value === "object" ? (value as LegacySettings) : {};
+  const moduleRules = normalizeModuleRules(legacy.categories, BALANCED_RULES);
   return {
     ...structuredClone(DEFAULT_SETTINGS),
     enabled: bool(legacy.enabled, false),
     activePreset: "custom",
     customBasePreset: "balanced",
-    moduleRules: normalizeModuleRules(legacy.categories, BALANCED_RULES),
+    moduleRules,
+    customModuleRules: structuredClone(moduleRules),
   };
 }
 
@@ -195,13 +203,19 @@ export function normalizeSettings(value: unknown): Settings {
   const customBasePreset = validBase.includes(input.customBasePreset as Settings["customBasePreset"])
     ? (input.customBasePreset as Settings["customBasePreset"])
     : "balanced";
+  const moduleRules = normalizeModuleRules(input.moduleRules, BALANCED_RULES);
+  const customModuleRules = normalizeModuleRules(
+    input.customModuleRules,
+    activePreset === "custom" ? moduleRules : BALANCED_RULES,
+  );
 
   return {
     schemaVersion: SETTINGS_SCHEMA_VERSION,
     enabled: bool(input.enabled, false),
     activePreset,
     customBasePreset,
-    moduleRules: normalizeModuleRules(input.moduleRules, BALANCED_RULES),
+    moduleRules,
+    customModuleRules,
     keywordRules,
     readingTools: {
       keywordsEnabled: bool(input.readingTools?.keywordsEnabled, true),
@@ -235,22 +249,29 @@ export function settingsFromStorageChange(
 }
 
 export function settingsForPreset(settings: Settings, preset: Preset): Settings {
-  if (preset === "custom") return { ...settings, activePreset: "custom" };
+  if (preset === "custom") {
+    return {
+      ...settings,
+      activePreset: "custom",
+      moduleRules: structuredClone(settings.customModuleRules),
+    };
+  }
   const rules = preset === "minimal" ? MINIMAL_RULES : preset === "native" ? NATIVE_RULES : BALANCED_RULES;
   return {
     ...settings,
     activePreset: preset,
-    customBasePreset: preset,
     moduleRules: structuredClone(rules),
   };
 }
 
 export function customizeModule(settings: Settings, category: CategoryKey, hidden: boolean): Settings {
+  const moduleRules = { ...settings.moduleRules, [category]: hidden };
   return {
     ...settings,
     activePreset: "custom",
     customBasePreset: settings.activePreset === "custom" ? settings.customBasePreset : settings.activePreset,
-    moduleRules: { ...settings.moduleRules, [category]: hidden },
+    moduleRules,
+    customModuleRules: structuredClone(moduleRules),
   };
 }
 
@@ -258,11 +279,24 @@ export async function loadSettings(): Promise<Settings> {
   if (typeof chrome === "undefined" || !chrome.storage) return structuredClone(DEFAULT_SETTINGS);
   const local = await chrome.storage.local.get([SETTINGS_KEY, LEGACY_SETTINGS_KEY]);
   let normalized: Settings;
+  let syncLoaded = false;
   if (local[SETTINGS_KEY]) normalized = normalizeSettings(local[SETTINGS_KEY]);
   else if (local[LEGACY_SETTINGS_KEY]) normalized = migrateLegacySettings(local[LEGACY_SETTINGS_KEY]);
-  else normalized = structuredClone(DEFAULT_SETTINGS);
+  else {
+    normalized = structuredClone(DEFAULT_SETTINGS);
+    try {
+      const synced = await chrome.storage.sync.get(SETTINGS_KEY);
+      const syncedSettings = synced[SETTINGS_KEY]
+        ? normalizeSettings(synced[SETTINGS_KEY])
+        : null;
+      if (syncedSettings?.syncEnabled) normalized = { ...syncedSettings, syncEnabled: true };
+      syncLoaded = true;
+    } catch {
+      // A fresh profile can still start with safe local defaults when Sync is unavailable.
+    }
+  }
 
-  if (normalized.syncEnabled) {
+  if (normalized.syncEnabled && !syncLoaded) {
     try {
       const synced = await chrome.storage.sync.get(SETTINGS_KEY);
       if (synced[SETTINGS_KEY]) normalized = { ...normalizeSettings(synced[SETTINGS_KEY]), syncEnabled: true };
@@ -288,4 +322,26 @@ export async function saveSettings(settings: Settings): Promise<SaveResult> {
   } catch (error) {
     return { syncError: error instanceof Error ? error.message : "Chrome Sync is unavailable" };
   }
+}
+
+export async function enableSettingsSync(settings: Settings): Promise<EnableSyncResult> {
+  const localSettings = { ...normalizeSettings(settings), syncEnabled: true };
+  if (typeof chrome === "undefined" || !chrome.storage) {
+    return { settings: localSettings, imported: false };
+  }
+  try {
+    const synced = await chrome.storage.sync.get(SETTINGS_KEY);
+    const syncedSettings = synced[SETTINGS_KEY]
+      ? normalizeSettings(synced[SETTINGS_KEY])
+      : null;
+    if (syncedSettings?.syncEnabled) {
+      const imported = { ...syncedSettings, syncEnabled: true };
+      await chrome.storage.local.set({ [SETTINGS_KEY]: imported });
+      return { settings: imported, imported: true };
+    }
+  } catch {
+    // saveSettings below preserves the local copy and reports an unavailable Sync write.
+  }
+  const result = await saveSettings(localSettings);
+  return { ...result, settings: localSettings, imported: false };
 }

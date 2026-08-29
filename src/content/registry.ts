@@ -13,7 +13,10 @@ export interface CandidateSafetyOptions {
 
 // Conservative selectors only. Each match is independently safety-checked before hiding.
 // Keep this registry centralized and versioned so LinkedIn changes are easy to audit.
-export const SELECTOR_MAP_VERSION = "2026-08-29.6";
+export const SELECTOR_MAP_VERSION = "2026-08-30.13";
+export const STATUS_MESSAGE_TYPE = `JTR_GET_STATUS:${SELECTOR_MAP_VERSION}` as const;
+export const REFRESH_MESSAGE_TYPE = `JTR_REFRESH_WIDGET:${SELECTOR_MAP_VERSION}` as const;
+export const OPEN_OPTIONS_MESSAGE_TYPE = `JTR_OPEN_OPTIONS:${SELECTOR_MAP_VERSION}` as const;
 
 export const DESCRIPTION_SELECTORS = [
   "#job-details",
@@ -56,7 +59,9 @@ export const MODULE_RULES: readonly ModuleRule[] = [
       ".jobs-premium-company-growth",
       ".jobs-premium-job-details-card",
       "[id^='JobDetails_PremiumCompanyInsights_']",
+      "[id^='JobDetails_ResumeReview_']",
       "[data-sdui-component$='.premiumCompanyInsightsForJobDetails']",
+      "[data-sdui-component$='.resumeReview']",
       "[data-view-name='premium-upsell-card']",
     ],
   },
@@ -68,6 +73,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
       ".jobs-recommended-jobs-list",
       ".similar-jobs",
       ".people-also-viewed",
+      "[id^='JobDetailsSimilarJobsSlot_']",
+      "[data-sdui-component$='.similarJobs']",
       "[data-view-name='similar-jobs-card']",
       "[data-view-name='recommended-jobs-card']",
     ],
@@ -80,6 +87,8 @@ export const MODULE_RULES: readonly ModuleRule[] = [
       ".jobs-details__promoted-jobs",
       ".job-alert-redirect-section",
       ".similar-searches",
+      "[id^='JobDetails_JobAlertToggle_']",
+      "[data-sdui-component$='.jobAlertToggle']",
       "[data-view-name='job-details-footer-promo']",
     ],
   },
@@ -151,6 +160,7 @@ export const JOB_ROOT_SELECTORS = [
   ".jobs-details",
   ".job-view-layout",
   ".core-rail",
+  "section[aria-label='Primary content']",
   "[data-sdui-screen='com.linkedin.sdui.flagshipnav.jobs.SemanticJobDetails']",
 ] as const;
 
@@ -159,6 +169,7 @@ export const TITLE_SELECTORS = [
   ".jobs-unified-top-card__job-title",
   ".top-card-layout__title",
   "[data-view-name='job-title']",
+  "[data-testid='lazy-column'] [data-display-contents='true'] > p",
   "[data-sdui-screen='com.linkedin.sdui.flagshipnav.jobs.SemanticJobDetails'] a[href*='/jobs/view/']",
 ] as const;
 

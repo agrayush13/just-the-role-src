@@ -30,6 +30,20 @@ The versioned key and number describe storage compatibility only. They are not p
     "topNavigation": false,
     "searchResultsPane": false
   },
+  "customModuleRules": {
+    "aiMatch": true,
+    "applicantInsights": false,
+    "premiumUpsells": true,
+    "recommendations": true,
+    "footerPromotions": true,
+    "applicantCount": false,
+    "hiringTeam": false,
+    "peopleConnections": false,
+    "companyOverview": false,
+    "jobDescription": false,
+    "topNavigation": false,
+    "searchResultsPane": false
+  },
   "keywordRules": [],
   "readingTools": {
     "keywordsEnabled": true,
@@ -55,16 +69,17 @@ The versioned key and number describe storage compatibility only. They are not p
 | --- | --- | --- |
 | `schemaVersion` | `2` | Selects the current normalization path. |
 | `enabled` | boolean | Master Focus Mode switch; defaults to false. |
-| `activePreset` | `minimal`, `balanced`, `native`, `custom` | Current view. Custom is produced by category editing or migration. |
+| `activePreset` | `minimal`, `balanced`, `native`, `custom` | Current view. Custom is directly selectable and is also produced by category editing or migration. |
 | `customBasePreset` | `minimal`, `balanced`, `native` | Preset restored from a Custom view. |
 | `moduleRules` | category-to-boolean map | `true` requests hiding; every candidate still passes the DOM safety check. |
+| `customModuleRules` | category-to-boolean map | Saved Custom configuration, recalled independently of the previously active built-in preset. Missing legacy values default to Balanced unless the stored active view is already Custom, in which case its effective rules are preserved. |
 | `keywordRules` | up to 50 `KeywordRule` objects | User-defined local matching configuration. |
 | `readingTools` | booleans | Enables keyword markers and reliable-section controls independently. |
 | `searchBeta` | booleans | Default-off search-list density and collapse controls. |
 | `syncEnabled` | boolean | Opt-in configuration synchronization. |
 | `uiPreferences.reducedMotion` | `system`, `reduce` | Uses system behavior or forces non-smooth in-page navigation. |
 | `uiPreferences.controlPlacement` | `inline` | Reserved, allowlisted Focus Bar placement. |
-| `uiPreferences.focusBarVisible` | boolean | Shows the on-page Focus Bar independently from Focus Mode; defaults to true. |
+| `uiPreferences.focusBarVisible` | boolean | Shows the on-page Focus Bar independently from Focus Mode; defaults to true. When Focus Mode is off, the bar exposes an activation action without transforming LinkedIn content. |
 
 ## Keyword rule
 
@@ -120,10 +135,10 @@ Fields such as job URLs, descriptions, titles, account data, and scores cannot f
 
 ## Migration
 
-When the schema number differs, the legacy migrator copies only the master enabled flag and recognized category booleans. The result becomes a Custom view based on Balanced, preserving effective visibility while newer fields receive safe defaults. Loading then writes the normalized current object to local storage.
+When the schema number differs, the legacy migrator copies only the master enabled flag and recognized category booleans. The result becomes a Custom view based on Balanced, and the migrated category map is also stored as its independent Custom configuration so effective visibility is preserved. Loading then writes the normalized current object to local storage.
 
 ## Local and Sync behavior
 
 `chrome.storage.local` always receives the normalized object. If Sync is enabled, the same allowlisted object is written to `chrome.storage.sync`. A Sync quota or availability error does not roll back local storage and is surfaced to the user. When Sync is disabled, the synced key is removed when possible.
 
-On startup, a locally enabled Sync setting may be overlaid by a present synced object. If no synced object exists or Sync cannot be read, local configuration remains authoritative. Open content scripts respond to local changes and accept Sync changes only while their current settings opt into Sync.
+On a fresh browser profile with no local configuration, an existing opted-in synced object is adopted. Enabling Sync on an existing profile also imports an existing opted-in cloud copy instead of overwriting it. Otherwise, a locally enabled Sync setting may be overlaid by a present synced object. If no synced object exists or Sync cannot be read, local configuration remains authoritative. Remote Sync changes are mirrored into local storage, and open extension surfaces update from that local copy. Profiles that explicitly have Sync disabled ignore stale Sync changes.

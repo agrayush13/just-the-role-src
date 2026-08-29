@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JustTheRole settings</title>
+    <title>JUSTTHEROLE settings</title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
@@ -17,7 +17,7 @@
       <section class="panel master-panel" aria-label="Primary extension controls">
         <div class="master-setting">
           <div>
-            <h2>Focus Mode</h2>
+            <h2>Focus Mode: <span id="options-master-state">Off</span></h2>
             <p>Apply your preset and reading tools on supported job pages.</p>
           </div>
           <label class="switch"><input id="enabled" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Enable Focus Mode</span></label>
@@ -25,9 +25,10 @@
         <div class="master-setting">
           <div>
             <h2>On-page widget</h2>
-            <p>Show JustTheRole controls above the job details.</p>
+            <p>Show JUSTTHEROLE controls above the job details.</p>
+            <p id="options-widget-off-note" class="widget-off-note" hidden>The widget remains visible so you can enable Focus Mode from a job page.</p>
           </div>
-          <label class="switch"><input id="focus-bar-visible" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Show the on-page JustTheRole widget</span></label>
+          <label class="switch"><input id="focus-bar-visible" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Show the on-page JUSTTHEROLE widget</span></label>
         </div>
       </section>
 
@@ -42,7 +43,7 @@
       <section class="panel" aria-labelledby="modules-heading">
         <div class="section-heading">
           <div><p class="step">02</p><h2 id="modules-heading">Supported page blocks</h2></div>
-          <p>Changes create Custom. About the job stays visible by default; titles and application actions stay protected.</p>
+          <p>Changes create Custom. About the job is optional; titles and apply actions stay protected.</p>
         </div>
         <div id="modules" class="setting-list"></div>
       </section>
@@ -59,7 +60,7 @@
             <span id="keyword-type-label" class="field-label">Meaning</span>
             <div class="custom-select" data-custom-select="keyword-type">
               <input id="keyword-type" type="hidden" value="positive" />
-              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-type-label keyword-type-value"><span id="keyword-type-value">Desired</span></button>
+              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-type-label keyword-type-value"><span id="keyword-type-value" class="select-value">Desired</span></button>
               <div class="select-options" role="listbox" aria-labelledby="keyword-type-label" hidden>
                 <button type="button" role="option" data-value="positive" aria-selected="true">Desired</button>
                 <button type="button" role="option" data-value="neutral" aria-selected="false">Notice</button>
@@ -71,7 +72,7 @@
             <span id="keyword-mode-label" class="field-label">Match</span>
             <div class="custom-select" data-custom-select="keyword-mode">
               <input id="keyword-mode" type="hidden" value="whole-word" />
-              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-mode-label keyword-mode-value"><span id="keyword-mode-value">Whole word</span></button>
+              <button class="select-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="keyword-mode-label keyword-mode-value"><span id="keyword-mode-value" class="select-value">Whole word</span></button>
               <div class="select-options" role="listbox" aria-labelledby="keyword-mode-label" hidden>
                 <button type="button" role="option" data-value="whole-word" aria-selected="true">Whole word</button>
                 <button type="button" role="option" data-value="phrase" aria-selected="false">Exact phrase</button>
@@ -93,23 +94,28 @@
             <label class="setting"><span><strong>Section navigation</strong><small>Show controls only after two reliable English headings are found.</small></span><input id="sections-enabled" type="checkbox" /></label>
           </div>
         </div>
-        <div>
+        <div class="sync-column">
           <p class="step">05</p><h2>Chrome Sync</h2>
-          <p class="disclosure">Off by default. When enabled, layout preferences and potentially sensitive keyword rules may be stored through your Chrome account. Local settings remain available if Sync fails.</p>
-          <label class="setting standalone"><span><strong>Sync configuration</strong></span><input id="sync-enabled" type="checkbox" /></label>
+          <div class="setting-list compact">
+            <label class="setting"><span><strong>Sync configuration</strong><small>Off by default. When enabled, layout preferences and potentially sensitive keyword rules may be stored through your Chrome account. Local settings remain available if Sync fails.</small></span><input id="sync-enabled" type="checkbox" /></label>
+          </div>
         </div>
       </section>
 
-      <section class="panel beta" aria-labelledby="beta-heading">
-        <p class="badge">SEPARATE BETA · DEFAULT OFF</p>
-        <h2 id="beta-heading">Search-list cleanup</h2>
-        <p>Only visibly labeled Viewed or Applied cards can be collapsed. Sponsored and promoted listings are hard-excluded.</p>
-        <div class="setting-list compact">
-          <label class="setting"><span><strong>Compact density</strong><small>Reduce spacing without removing card facts or actions.</small></span><input id="compact-density" type="checkbox" /></label>
-          <label class="setting"><span><strong>Collapse viewed jobs</strong><small>Add a reversible Show viewed counter.</small></span><input id="collapse-viewed" type="checkbox" /></label>
-          <label class="setting"><span><strong>Collapse applied jobs</strong><small>Add a reversible Show applied counter.</small></span><input id="collapse-applied" type="checkbox" /></label>
+      <details class="panel experimental">
+        <summary>
+          <span><span class="badge">EXPERIMENTAL · DEFAULT OFF</span><strong>Search-list cleanup</strong></span>
+          <small>Optional controls for visibly labeled Viewed or Applied cards.</small>
+        </summary>
+        <div class="experimental-content">
+          <p>Sponsored and promoted listings are always excluded.</p>
+          <div class="setting-list compact">
+            <label class="setting"><span><strong>Compact density</strong><small>Reduce spacing without removing card facts or actions.</small></span><input id="compact-density" type="checkbox" /></label>
+            <label class="setting"><span><strong>Collapse viewed jobs</strong><small>Add a reversible Show viewed counter.</small></span><input id="collapse-viewed" type="checkbox" /></label>
+            <label class="setting"><span><strong>Collapse applied jobs</strong><small>Add a reversible Show applied counter.</small></span><input id="collapse-applied" type="checkbox" /></label>
+          </div>
         </div>
-      </section>
+      </details>
 
       <div class="footer-actions">
         <button id="reset" type="button">Reset defaults</button>

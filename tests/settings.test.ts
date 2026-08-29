@@ -6,8 +6,11 @@ import {
   DEFAULT_SETTINGS,
   MINIMAL_RULES,
   customizeModule,
+  enableSettingsSync,
+  loadSettings,
   migrateLegacySettings,
   normalizeSettings,
+  saveSettings,
   settingsFromStorageChange,
   settingsForPreset,
   shouldReduceMotion,
@@ -18,6 +21,7 @@ test("new installs are disabled with Balanced selected", () => {
   assert.equal(settings.enabled, false);
   assert.equal(settings.activePreset, "balanced");
   assert.deepEqual(settings.moduleRules, BALANCED_RULES);
+  assert.deepEqual(settings.customModuleRules, BALANCED_RULES);
   assert.deepEqual(settings.searchBeta, {
     compactDensity: false,
     collapseViewed: false,
@@ -43,6 +47,7 @@ test("legacy settings migrate to Custom without changing effective visibility", 
   assert.equal(settings.enabled, true);
   assert.equal(settings.activePreset, "custom");
   assert.deepEqual(settings.moduleRules, legacyCategories);
+  assert.deepEqual(settings.customModuleRules, legacyCategories);
 });
 
 test("preset resolution is deterministic and does not mutate defaults", () => {
@@ -50,6 +55,20 @@ test("preset resolution is deterministic and does not mutate defaults", () => {
   assert.deepEqual(settings.moduleRules, MINIMAL_RULES);
   settings.moduleRules.aiMatch = false;
   assert.equal(MINIMAL_RULES.aiMatch, true);
+});
+
+test("Custom has one stable saved configuration regardless of the preceding preset", () => {
+  const minimal = settingsForPreset(structuredClone(DEFAULT_SETTINGS), "minimal");
+  const custom = settingsForPreset(minimal, "custom");
+  assert.equal(custom.activePreset, "custom");
+  assert.equal(custom.customBasePreset, "balanced");
+  assert.deepEqual(custom.moduleRules, BALANCED_RULES);
+
+  const customized = customizeModule(custom, "applicantInsights", true);
+  const native = settingsForPreset(customized, "native");
+  const restored = settingsForPreset(native, "custom");
+  assert.deepEqual(restored.moduleRules, customized.moduleRules);
+  assert.deepEqual(restored.customModuleRules, customized.moduleRules);
 });
 
 test("About the job remains visible in every built-in preset", () => {
@@ -70,6 +89,7 @@ test("a module change produces Custom and remembers its base preset", () => {
   assert.equal(custom.activePreset, "custom");
   assert.equal(custom.customBasePreset, "minimal");
   assert.equal(custom.moduleRules.hiringTeam, false);
+  assert.equal(custom.customModuleRules.hiringTeam, false);
 });
 
 test("schema normalization strips unknown data-boundary fields", () => {
@@ -127,4 +147,102 @@ test("stale sync updates are ignored when sync is disabled", () => {
   const current = structuredClone(DEFAULT_SETTINGS);
   const synced = { ...current, enabled: true, syncEnabled: true };
   assert.equal(settingsFromStorageChange("sync", synced, current), null);
+});
+
+test("a fresh browser profile adopts an existing opted-in Sync configuration", async () => {
+  const synced = {
+    ...structuredClone(DEFAULT_SETTINGS),
+    enabled: true,
+    activePreset: "minimal" as const,
+    syncEnabled: true,
+  };
+  let locallyStored: unknown;
+  const previousChrome = globalThis.chrome;
+  globalThis.chrome = {
+    storage: {
+      local: {
+        get: async () => ({}),
+        set: async (value: unknown) => { locallyStored = value; },
+      },
+      sync: { get: async () => ({ settingsV2: synced }) },
+    },
+  } as unknown as typeof chrome;
+  try {
+    const loaded = await loadSettings();
+    assert.equal(loaded.enabled, true);
+    assert.equal(loaded.activePreset, "minimal");
+    assert.equal(loaded.syncEnabled, true);
+    assert.deepEqual(locallyStored, { settingsV2: loaded });
+  } finally {
+    globalThis.chrome = previousChrome;
+  }
+});
+
+test("an explicitly opted-out local profile does not read stale Sync data", async () => {
+  let syncReads = 0;
+  const previousChrome = globalThis.chrome;
+  globalThis.chrome = {
+    storage: {
+      local: {
+        get: async () => ({ settingsV2: structuredClone(DEFAULT_SETTINGS) }),
+        set: async () => {},
+      },
+      sync: { get: async () => { syncReads += 1; return {}; } },
+    },
+  } as unknown as typeof chrome;
+  try {
+    const loaded = await loadSettings();
+    assert.equal(loaded.syncEnabled, false);
+    assert.equal(syncReads, 0);
+  } finally {
+    globalThis.chrome = previousChrome;
+  }
+});
+
+test("a Sync write failure preserves the normalized local configuration", async () => {
+  let locallyStored: unknown;
+  const previousChrome = globalThis.chrome;
+  globalThis.chrome = {
+    storage: {
+      local: { set: async (value: unknown) => { locallyStored = value; } },
+      sync: { set: async () => { throw new Error("quota exceeded"); } },
+    },
+  } as unknown as typeof chrome;
+  const requested = { ...structuredClone(DEFAULT_SETTINGS), enabled: true, syncEnabled: true };
+  try {
+    const result = await saveSettings(requested);
+    assert.deepEqual(locallyStored, { settingsV2: requested });
+    assert.equal(result.syncError, "quota exceeded");
+  } finally {
+    globalThis.chrome = previousChrome;
+  }
+});
+
+test("enabling Sync on an existing profile imports rather than overwrites cloud settings", async () => {
+  const cloudSettings = {
+    ...structuredClone(DEFAULT_SETTINGS),
+    activePreset: "minimal" as const,
+    syncEnabled: true,
+  };
+  let locallyStored: unknown;
+  let syncWrites = 0;
+  const previousChrome = globalThis.chrome;
+  globalThis.chrome = {
+    storage: {
+      local: { set: async (value: unknown) => { locallyStored = value; } },
+      sync: {
+        get: async () => ({ settingsV2: cloudSettings }),
+        set: async () => { syncWrites += 1; },
+      },
+    },
+  } as unknown as typeof chrome;
+  try {
+    const result = await enableSettingsSync(structuredClone(DEFAULT_SETTINGS));
+    assert.equal(result.imported, true);
+    assert.equal(result.settings.activePreset, "minimal");
+    assert.deepEqual(locallyStored, { settingsV2: result.settings });
+    assert.equal(syncWrites, 0);
+  } finally {
+    globalThis.chrome = previousChrome;
+  }
 });

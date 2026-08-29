@@ -1,19 +1,21 @@
-# JustTheRole
+# JUSTTHEROLE
 
-JustTheRole is a privacy-first Chrome extension that turns supported LinkedIn Jobs pages into a calmer, personal reading view. It hides recognized page blocks selected by the user, marks words and phrases the user defines, adds navigation for reliably detected description sections, and can reduce clutter in a search-results list.
+JUSTTHEROLE is a privacy-first Chrome extension that turns supported LinkedIn Jobs pages into a calmer, personal reading view. It hides recognized page blocks selected by the user, marks words and phrases the user defines, adds navigation for reliably detected description sections, and can reduce clutter in a search-results list.
 
 The extension is deterministic and visual-only. It does not scrape jobs, summarize or score descriptions, automate LinkedIn actions, collect analytics, store job content, or make extension-initiated network requests.
 
 ## What it does
 
-Focus Mode is off on a fresh install. After the user enables it, JustTheRole applies one of these views:
+Focus Mode is off on a fresh install. After the user enables it, JUSTTHEROLE applies one of these views:
+
+Chrome opens the full settings page once after a fresh installation so the available controls are visible. Updates and extension reloads do not reopen it.
 
 - **Balanced** hides supported match, upsell, recommendation, and promotional modules while retaining useful job context.
 - **Minimal** keeps the job title, company and location context, original description, and core actions while hiding all supported optional modules.
 - **Native** leaves LinkedIn page modules visible while retaining separately enabled reading tools.
-- **Custom** is created automatically when the user changes an individual supported category.
+- **Custom** is always selectable and recalls one saved set of category choices, independent of the previously selected preset.
 
-On a supported job detail view, the branded in-page Focus Bar appears before the AI/profile-match module when present and lets the user switch views without reloading, temporarily show the original page, undo the latest view change, restore the preset behind a Custom view, and open a safe page-block picker. It follows the page's light or dark appearance using the extension palette and can be hidden independently from the popup or full settings without disabling cleanup. The title, company/location context, Apply, Save, Share, and Report remain protected. About the job can be hidden only through an explicit Custom choice and remains visible in every built-in preset.
+On a supported job detail view, the branded in-page Focus Bar appears before the AI/profile-match module when present and lets the user switch views without reloading, edit the saved Custom category choices directly, temporarily show the original page, undo the latest view change, and restore the preset behind a Custom view. It follows the page's light or dark appearance using the extension palette and can be hidden independently from the popup or full settings. If Focus Mode is off while the Focus Bar preference remains on, the bar stays visible with an explicit Enable Focus Mode action. The title, company/location context, Apply, Save, Share, and Report remain protected. About the job can be hidden only through an explicit Custom choice and remains visible in every built-in preset.
 
 Opening the toolbar popup can also activate the bundled content script and stylesheet on an already-open LinkedIn Jobs tab. This covers installation and extension-reload cases without requiring the user to refresh the job page.
 
@@ -28,9 +30,9 @@ Optional reading tools provide:
 
 Only extension configuration is stored: the Focus Mode switch, selected view, module choices, keyword rules, reading-tool preferences, search-list preferences, and UI preferences such as on-page widget visibility. Chrome Sync is optional and off by default. When enabled, the same configuration—including potentially sensitive keyword rules—may be synchronized through the user's Chrome account; the local copy remains available if Sync fails.
 
-JustTheRole does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests Chrome storage, narrowly scoped LinkedIn Jobs access, and user-initiated active-tab scripting so the packaged code can activate on an already-open job tab. The content script does not run on non-Jobs paths.
+JUSTTHEROLE does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests Chrome storage, narrowly scoped LinkedIn Jobs access, and user-initiated active-tab scripting so the packaged code can activate on an already-open job tab. The content script does not run on non-Jobs paths.
 
-LinkedIn can change its DOM independently. Selectors are centralized and versioned, every candidate is safety-checked independently, and unrecognized structures fail open by remaining visible. Disabling Focus Mode or choosing **Show original** removes all DOM changes made by the extension.
+LinkedIn can change its DOM independently. Selectors are centralized and versioned, every candidate is safety-checked independently, and unrecognized structures fail open by remaining visible. Disabling Focus Mode or choosing **Show original** restores all changes to LinkedIn content; the independently enabled Focus Bar may remain available as extension UI.
 
 ## Documentation
 
@@ -51,6 +53,8 @@ npm run verify
 ```
 
 Then open `chrome://extensions`, enable Developer mode, select **Load unpacked**, and choose the generated `dist/` directory.
+
+After every local rebuild, click **Reload** on that exact extension card in `chrome://extensions`. Refreshing LinkedIn alone does not reload the unpacked extension package. Keep only one unpacked JUSTTHEROLE copy enabled and confirm it points to this repository's `dist/` directory; otherwise an older content script can render alongside the current build.
 
 Useful commands:
 

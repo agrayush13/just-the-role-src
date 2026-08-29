@@ -5,7 +5,11 @@ import {
   DESCRIPTION_SELECTORS,
   JOB_ROOT_SELECTORS,
   MODULE_RULES,
+  OPEN_OPTIONS_MESSAGE_TYPE,
   PROTECTED_SELECTORS,
+  REFRESH_MESSAGE_TYPE,
+  SELECTOR_MAP_VERSION,
+  STATUS_MESSAGE_TYPE,
   TITLE_SELECTORS,
   isSafeCandidate,
 } from "../src/content/registry";
@@ -31,6 +35,15 @@ test("the selector registry has one isolated rule for every setting category", (
     [...CATEGORY_KEYS].sort(),
   );
   for (const rule of MODULE_RULES) assert.ok(rule.selectors.length > 0);
+});
+
+test("the content-script status handshake is scoped to the current selector map", () => {
+  assert.equal(STATUS_MESSAGE_TYPE, `JTR_GET_STATUS:${SELECTOR_MAP_VERSION}`);
+  assert.equal(REFRESH_MESSAGE_TYPE, `JTR_REFRESH_WIDGET:${SELECTOR_MAP_VERSION}`);
+  assert.equal(OPEN_OPTIONS_MESSAGE_TYPE, `JTR_OPEN_OPTIONS:${SELECTOR_MAP_VERSION}`);
+  assert.notEqual(STATUS_MESSAGE_TYPE, "JTR_GET_STATUS");
+  assert.notEqual(REFRESH_MESSAGE_TYPE, "JTR_REFRESH_WIDGET");
+  assert.notEqual(OPEN_OPTIONS_MESSAGE_TYPE, "JTR_OPEN_OPTIONS");
 });
 
 test("the job root can never be hidden", () => {
@@ -95,4 +108,12 @@ test("the selector registry covers LinkedIn semantic job details", () => {
   assert.ok(MODULE_RULES.find((rule) => rule.category === "premiumUpsells")?.selectors.includes("[id^='JobDetails_PremiumCompanyInsights_']"));
   assert.ok(MODULE_RULES.find((rule) => rule.category === "peopleConnections")?.selectors.includes("[id^='JobDetailsPeopleWhoCanHelpSlot_']"));
   assert.ok(MODULE_RULES.find((rule) => rule.category === "companyOverview")?.selectors.includes("[id^='JobDetails_AboutTheCompany_']"));
+});
+
+test("the selector registry covers the Primary content SDUI job details variant", () => {
+  assert.ok(JOB_ROOT_SELECTORS.includes("section[aria-label='Primary content']"));
+  assert.ok(TITLE_SELECTORS.includes("[data-testid='lazy-column'] [data-display-contents='true'] > p"));
+  assert.ok(MODULE_RULES.find((rule) => rule.category === "premiumUpsells")?.selectors.includes("[id^='JobDetails_ResumeReview_']"));
+  assert.ok(MODULE_RULES.find((rule) => rule.category === "recommendations")?.selectors.includes("[id^='JobDetailsSimilarJobsSlot_']"));
+  assert.ok(MODULE_RULES.find((rule) => rule.category === "footerPromotions")?.selectors.includes("[id^='JobDetails_JobAlertToggle_']"));
 });

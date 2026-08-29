@@ -8,7 +8,7 @@ Upload in this order:
 
 1. `screenshots/01-focus-mode.png` — Focus Mode on a sanitized job listing
 2. `screenshots/02-keywords-and-sections.png` — local keyword markers and section navigation
-3. `screenshots/03-customize-page.png` — supported-block customization picker
+3. `screenshots/03-customize-page.png` — direct Custom page-block controls
 4. `screenshots/04-presets-and-settings.png` — presets and extension settings
 5. `screenshots/05-search-list-cleanup.png` — reversible Viewed/Applied cleanup with promoted jobs preserved
 

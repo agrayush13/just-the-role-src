@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JustTheRole Promo</title>
+    <title>JUSTTHEROLE Promo</title>
     <style>
       * { box-sizing: border-box; }
       html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
@@ -18,14 +18,19 @@
       body.marquee .content { justify-content: flex-start; padding: 6% 10%; }
       body.marquee .logo { width: 330px; height: 330px; }
       body.marquee .copy { display: block; }
+      body.small .logo { width: 134px; height: 134px; }
     </style>
-    <script>document.addEventListener("DOMContentLoaded", () => { if (innerWidth > 800) document.body.classList.add("marquee"); });</script>
+    <script>document.addEventListener("DOMContentLoaded", () => {
+      const format = new URLSearchParams(location.search).get("format");
+      if (format === "small") document.body.classList.add("small");
+      else if (innerWidth > 800) document.body.classList.add("marquee");
+    });</script>
   </head>
   <body>
     <div class="glow"></div><div class="lines"></div>
     <main class="content">
-      <img class="logo" src="/icon-source.png" alt="JustTheRole" />
-      <div class="copy"><h1>JustTheRole</h1><p>Only the role. None of the noise.</p></div>
+      <img class="logo" src="/icon-source.png" alt="JUSTTHEROLE" />
+      <div class="copy"><h1>JUSTTHEROLE</h1><p>Only the role. None of the noise.</p></div>
     </main>
   </body>
 </html>

@@ -12,17 +12,17 @@
 
 ### First use
 
-The popup explains whether the current page is supported and presents an off-by-default Focus Mode switch. Enabling it applies the preselected Balanced view. Deliberate activation prevents a new install from unexpectedly changing LinkedIn.
+Chrome opens the full settings page once after a fresh installation, while the off-by-default Focus Mode prevents the page from changing unexpectedly. The popup shows an explicit Focus Mode: Off state; enabling it applies the preselected Balanced view. If the independently enabled Focus Bar remains visible, both extension surfaces explain that it can be used to enable Focus Mode from a job page.
 
 ### Choosing a view
 
-The popup, options page, and Focus Bar expose the same named views. Balanced is the starting point, Minimal removes more supported optional content, and Native restores LinkedIn modules while allowing independent reading tools. Custom appears only after the user changes a category.
+The popup, options page, and Focus Bar expose the same named views. Balanced is the starting point, Minimal removes more supported optional content, and Native restores LinkedIn modules while allowing independent reading tools. Custom is always selectable, starts with Balanced choices on first use, remembers one independent category configuration, and exposes category-level controls in the popup and full settings.
 
 Changing a preset does not reload the page or move scroll position. The most recent view or category change is undoable from the Focus Bar. A Custom view can be restored to its source preset.
 
 ### Customizing the page
 
-**Customize page** outlines only detected blocks from the reviewed selector registry. The user can select an outlined block directly or use the modal category list. Escape and Cancel leave settings unchanged and return focus to the trigger. Only the category toggle is saved.
+Selecting Custom reveals the same saved category checkboxes in the popup, options page, and Focus Bar. Changes apply immediately and persist only the category choices; no job-page text, DOM path, or element identity is stored.
 
 ### Reviewing a description
 
@@ -38,13 +38,13 @@ When two or more reviewed headings are present, the Focus Bar offers jump links 
 
 ### Cleaning a search list
 
-Search cleanup is visually separated as an optional beta and starts off. Explicit Viewed or Applied labels may drive reversible collapsing. A Sponsored or Promoted label always exempts the card, even if another recognized status is present.
+Search cleanup is contained in a closed Experimental disclosure and starts off. Explicit Viewed or Applied labels may drive reversible collapsing. A Sponsored or Promoted label always exempts the card, even if another recognized status is present.
 
 ## Interface surfaces
 
 ### Popup
 
-The popup is the quick control surface: current-page status, Focus Mode, view selection, a compact reading summary, an independent on-page widget switch, full-settings access, and privacy-safe diagnostics. Turning off the widget removes only the Focus Bar; the chosen page cleanup and reading tools continue to run.
+The popup is a compact quick-control surface: logo and name on the left, current-page status icon and settings gear on the right, explicit Focus Mode state, independent on-page widget switch, view selection, and a compact reading summary. Selecting Custom reveals every supported category as a direct hide/show checkbox and recalls the same saved Custom choices regardless of the previous preset. The status icon uses an accessible label and tooltip; it does not repeat the active preset. Privacy and the explicitly labeled Copy diagnostics action sit together as visually matching secondary footer actions. Turning off the widget removes only the Focus Bar; the chosen page cleanup and reading tools continue to run. Turning off Focus Mode restores LinkedIn content while leaving the independently enabled Focus Bar available with an Enable action.
 
 ### Options page
 
@@ -52,14 +52,12 @@ The options page is the durable configuration surface: views, module categories,
 
 ### Focus Bar
 
-The Focus Bar sits immediately before the AI/profile-match module when that module is recognized, falling back to immediately before the job description. It uses Shadow DOM to isolate its UI styles and provides contextual controls without covering job content. The packaged logo appears directly before the JustTheRole name. Branding and view selection form a stable header, while actions and status occupy deliberate rows so wrapping does not split the interface arbitrarily.
+The Focus Bar sits immediately before the AI/profile-match module when that module is recognized, falling back to immediately before the job description. It uses Shadow DOM to isolate its UI styles and provides contextual controls without covering job content. The packaged logo appears directly before the JUSTTHEROLE name. Branding and view selection form a stable header, while actions and status occupy deliberate rows so wrapping does not split the interface arbitrarily. For built-in presets, the Focus Bar mirrors the popup's **Hidden on this page** category chips instead of reducing the result to a numeric count. Custom is always selectable and reveals the same saved category controls as the popup, using a two-column layout when space allows and a single column in narrow containers; the current-page chip summary is hidden in Custom.
 
 ## Accessibility
 
-- Controls use native buttons, checkboxes, selects, and dialog semantics.
+- Controls use native buttons and checkboxes plus an ARIA listbox pattern for extension-styled dropdowns.
 - Focus-visible outlines remain strong in extension surfaces and injected controls.
-- The picker dialog receives initial focus and returns focus on cancellation.
-- Escape cancels picker mode.
 - Live regions announce page state, saves, failures, and validation.
 - Keyword meaning is expressed with text labels as well as color and border style.
 - System reduced-motion preferences disable animation and smooth scrolling; a stored `reduce` override forces non-smooth section navigation.
@@ -71,4 +69,4 @@ Use concise, literal labels. Avoid claims that the extension understands, evalua
 
 ## Responsive and theme behavior
 
-The popup uses an extension-sized layout. The options page lets hero and explanatory copy use the available desktop width before switching to a stacked narrow layout. Injected markers define light and dark colors. The Focus Bar detects the page's rendered light or dark appearance, follows page-theme changes, and applies the same cream, green, surface, border, text, and focus-token family as the extension surfaces. No control relies on hover alone.
+The popup uses an extension-sized layout with single-line control descriptions and places the on-page widget before view selection. The options page lets hero and explanatory copy use the available desktop width before switching to a stacked narrow layout. Helper text uses readable contrast and checkbox rows provide generous click targets. Extension dropdowns share one interaction model, maintain a 10-pixel chevron inset, and align their menus to their triggers. Injected markers define light and dark colors. The Focus Bar detects the page's rendered light or dark appearance, follows page-theme changes, and applies the same cream, green, surface, border, text, and focus-token family as the extension surfaces. No control relies on hover alone.

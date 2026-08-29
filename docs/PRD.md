@@ -1,8 +1,8 @@
-# JustTheRole product requirements
+# JUSTTHEROLE product requirements
 
 ## Product summary
 
-JustTheRole is a Chrome extension for people who want to evaluate LinkedIn job descriptions with less visual noise and without sending career data to another service. It provides a reversible focus layer over supported LinkedIn Jobs views. All decisions are based on reviewed selectors, explicit page labels, and rules created by the user.
+JUSTTHEROLE is a Chrome extension for people who want to evaluate LinkedIn job descriptions with less visual noise and without sending career data to another service. It provides a reversible focus layer over supported LinkedIn Jobs views. All decisions are based on reviewed selectors, explicit page labels, and rules created by the user.
 
 ## Problem
 
@@ -19,7 +19,7 @@ Job-detail pages mix the employer-written role description and primary actions w
 
 ## Non-goals
 
-JustTheRole does not scrape, export, or retain job or profile data; summarize descriptions; generate application advice; calculate fit scores; rank or recommend roles; automate LinkedIn actions; modify employer wording; provide analytics; or promise support for every LinkedIn layout, locale, or experiment.
+JUSTTHEROLE does not scrape, export, or retain job or profile data; summarize descriptions; generate application advice; calculate fit scores; rank or recommend roles; automate LinkedIn actions; modify employer wording; provide analytics; or promise support for every LinkedIn layout, locale, or experiment.
 
 ## Users and primary jobs
 
@@ -34,14 +34,15 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-03:** A job view is supported only when a rendered job root, title, and description can all be found.
 - **FR-04:** Unsupported or incomplete page structures must remain unchanged.
 - **FR-05:** LinkedIn single-page navigation and relevant DOM updates must trigger a debounced re-evaluation without moving scroll position.
+- **FR-48:** A fresh installation must open the existing full settings page once. Extension updates, Chrome updates, and extension reloads must not open it.
 
 ### Views and customization
 
 - **FR-06:** Balanced, Minimal, and Native views must resolve to deterministic category rules.
 - **FR-07:** Changing an individual category must create a Custom view and remember its source preset.
-- **FR-08:** Custom must not be offered as a new blank preset; it exists only after customization or migration.
+- **FR-08:** Custom must always be selectable and maintain one saved category configuration independent of the previously selected preset. Its initial configuration must match Balanced, and both the popup and Focus Bar must reveal the same supported category toggles for direct hide/show changes.
 - **FR-09:** The Focus Bar must support view switching, temporary original-page display, one-step undo, source-preset restoration, and keyword-settings access. It must render immediately before the first recognized AI/profile-match card, falling back to immediately before About the job when no such card is present.
-- **FR-10:** The page-block picker must expose only detected, supported categories and provide direct pointer selection plus a keyboard-operable modal list. About the job is available only as an explicit Custom choice and remains visible in every built-in preset.
+- **FR-10:** The popup, options page, and Focus Bar must expose supported category checkboxes when Custom is selected. About the job is available only as an explicit Custom choice and remains visible in every built-in preset.
 - **FR-11:** Customization may persist only the category toggle, never raw page text, a DOM path, or element identity.
 
 ### DOM safety and restoration
@@ -50,7 +51,7 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-13:** A candidate must not be hidden when it is the job root, contains the job root, matches a protected anchor, or contains a protected anchor.
 - **FR-14:** Always-protected anchors must include title, Apply, Save, company/location context, Share, Report, navigation, and account controls. The description must remain protected from every general module rule and may be hidden only by the dedicated About the job rule after an explicit Custom choice.
 - **FR-15:** Hiding must use extension-owned attributes and preserve an element's previous `aria-hidden` state.
-- **FR-16:** Disabling Focus Mode or selecting Show original must remove all extension-owned layout, marker, section, picker, and search-list changes.
+- **FR-16:** Disabling Focus Mode or selecting Show original must remove all extension-owned changes to LinkedIn content. When its independent visibility preference is enabled, the Focus Bar may remain as extension UI while Focus Mode is off.
 
 ### Keyword tools
 
@@ -69,7 +70,7 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 
 ### Search-list cleanup
 
-- **FR-26:** Search-list cleanup must be separately configurable and disabled by default.
+- **FR-26:** Search-list cleanup must be separately configurable, disabled by default, and contained in a closed Experimental disclosure on first render.
 - **FR-27:** Compact density may reduce spacing but must not remove facts or actions.
 - **FR-28:** Only cards with an explicit leading Viewed or Applied status label may be collapsed.
 - **FR-29:** Cards containing a visible Sponsored or Promoted label must never be collapsed.
@@ -92,24 +93,28 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-40:** Motion must follow the user's reduced-motion preference.
 - **FR-41:** Light and dark page contexts must retain legible controls and markers.
 - **FR-42:** A storage read failure must leave the page unchanged and the content script responsive.
-- **FR-43:** The Focus Bar must show the packaged JustTheRole logo immediately before the product name.
+- **FR-43:** The Focus Bar must show the packaged JUSTTHEROLE logo immediately before the product name.
 - **FR-44:** The Focus Bar must detect the rendered page's light or dark appearance, apply the corresponding extension palette, and update when the page theme changes.
-- **FR-45:** Users must be able to hide or show the on-page Focus Bar from both the popup and full settings without disabling Focus Mode or changing page-cleanup behavior. The preference must default to visible and persist through the normalized settings boundary.
+- **FR-45:** Users must be able to hide or show the on-page Focus Bar from both the popup and full settings without disabling Focus Mode or changing page-cleanup behavior. The preference must default to visible and persist through the normalized settings boundary. When Focus Mode is off and the preference is visible, the Focus Bar must remain available with an explicit Enable Focus Mode action.
 - **FR-46:** The Focus Bar must group branding, view selection, actions, and status predictably so narrower containers wrap at intentional group boundaries.
 - **FR-47:** The options page must use available horizontal space before wrapping hero and explanatory copy, while retaining a deliberate stacked layout at the narrow breakpoint.
+- **FR-49:** Preset and keyword dropdowns must use the same keyboard-operable extension listbox pattern in the popup, options page, and Focus Bar, with an aligned menu, consistent selection state, and page-appropriate light or dark colors.
+- **FR-49a:** For built-in presets, the popup and Focus Bar must list the labels of categories actually hidden on the current page rather than showing only a numeric count. Custom must show its direct category controls instead of this current-page summary. The Focus Bar must update this result automatically as a supported job view finishes lazy-loading, without requiring the popup, a visibility toggle, or a page refresh. A newly installed or updated content build must also activate itself on already-open supported job tabs without requiring the popup.
+- **FR-50:** The popup must prioritize Focus Mode, on-page widget visibility, and view selection. The logo and name must lead the header, the settings gear must sit on the right, and page support must use a compact status icon with an accessible label and tooltip rather than a second text row or repeated preset name. Copy diagnostics must be an explicitly labeled secondary footer action beside Privacy with matching link styling, and decorative tagline copy must not consume popup space.
+- **FR-51:** Focus Mode must expose a visible On or Off label. Off switches must retain a distinct dark track and light handle, and the popup and settings page must explain when the independently enabled Focus Bar remains visible.
 
 ## Acceptance criteria
 
 A release candidate is acceptable when:
 
 - strict TypeScript checks, automated tests, and the production build pass;
-- the sanitized fixture verifies hiding, highlighting, section controls, search cleanup, picker access, and complete restoration;
+- the sanitized fixture verifies hiding, highlighting, section controls, search cleanup, direct Custom controls, and complete restoration;
 - the store package contains one root manifest and no development-only files;
 - manual signed-in checks cover direct job pages and split search/detail views on current LinkedIn markup;
 - Apply, Save, Share, Report, title, and company/location context remain usable in every view; About the job remains visible in every built-in preset and is restored after its explicit Custom hiding choice is reversed;
 - the Focus Bar appears before the recognized AI/profile-match card, includes the packaged logo, follows both light and dark page themes, and can be hidden independently from the popup or settings;
 - desktop options layouts use available space without premature wrapping, while narrow layouts stack without horizontal overflow;
-- disabling Focus Mode and Show original leave no extension DOM mutations;
+- disabling Focus Mode and Show original restore all LinkedIn content mutations; the independently enabled Focus Bar may remain visible;
 - storage and diagnostics inspection confirms that no job or account data is retained.
 
 ## Success signals

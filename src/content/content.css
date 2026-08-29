@@ -1,28 +1,11 @@
+#just-the-role-control {
+  display: none !important;
+}
+
 [data-jtr-hidden="true"],
 [data-jtr-section-collapsed="true"],
 [data-jtr-search-hidden] {
   display: none !important;
-}
-
-[data-jtr-picker-category] {
-  position: relative !important;
-  outline: 3px solid #0a66c2 !important;
-  outline-offset: 3px !important;
-  cursor: pointer !important;
-}
-
-[data-jtr-picker-category]::before {
-  content: "JustTheRole: " attr(data-jtr-picker-label);
-  position: absolute;
-  z-index: 2147483646;
-  top: 4px;
-  right: 4px;
-  padding: 4px 7px;
-  border-radius: 5px;
-  background: #0a66c2;
-  color: #fff;
-  font: 700 11px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  pointer-events: none;
 }
 
 mark[data-jtr-mark] {
@@ -94,7 +77,6 @@ mark[data-jtr-keyword-type="dealbreaker"]::after { content: "Check"; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-jtr-picker-category],
   mark[data-jtr-mark],
   .jtr-section-toggle {
     animation: none !important;

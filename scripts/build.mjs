@@ -33,6 +33,15 @@ await Promise.all([
     sourcemap: false,
     legalComments: "none",
   }),
+  build({
+    entryPoints: ["src/background/index.ts"],
+    outfile: "dist/background.js",
+    bundle: true,
+    format: "iife",
+    target: "chrome120",
+    sourcemap: false,
+    legalComments: "none",
+  }),
 ]);
 
 await Promise.all([

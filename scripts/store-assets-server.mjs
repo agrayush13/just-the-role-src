@@ -17,6 +17,7 @@ const routes = new Map([
   ["/icon-source.png", ["assets/icons/icon-source.png", "image/png"]],
   ["/icon-128.png", ["assets/icons/icon-128.png", "image/png"]],
   ["/icon-32.png", ["assets/icons/icon-32.png", "image/png"]],
+  ["/icons/icon-32.png", ["assets/icons/icon-32.png", "image/png"]],
 ]);
 
 createServer((request, response) => {
