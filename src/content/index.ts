@@ -10,6 +10,7 @@ import {
   saveSettings,
   settingsFromStorageChange,
   settingsForPreset,
+  shouldReduceMotion,
   type CategoryKey,
   type KeywordType,
   type Preset,
@@ -404,7 +405,7 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
         <span class="brand">JustTheRole</span>
         <label><span class="label">View </span>
           <select data-action="preset" aria-label="Focus preset">
-            ${(["minimal", "balanced", "native", "custom"] as Preset[]).map((preset) => `<option value="${preset}" ${settings.activePreset === preset ? "selected" : ""}>${preset[0].toUpperCase()}${preset.slice(1)}</option>`).join("")}
+            ${(["minimal", "balanced", "native", "custom"] as Preset[]).map((preset) => `<option value="${preset}" ${settings.activePreset === preset ? "selected" : ""} ${preset === "custom" && settings.activePreset !== "custom" ? "disabled" : ""}>${preset[0].toUpperCase()}${preset.slice(1)}</option>`).join("")}
           </select>
         </label>
         <button class="primary" type="button" data-action="customize">Customize page</button>
@@ -457,7 +458,11 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
   shadow.querySelectorAll<HTMLButtonElement>("[data-action='section']").forEach((button) => {
     button.addEventListener("click", () => {
       const section = detectedSections.find((item) => item.kind === button.dataset.section);
-      section?.heading.scrollIntoView({ block: "start", behavior: settings.uiPreferences.reducedMotion === "reduce" ? "auto" : "smooth" });
+      const reduceMotion = shouldReduceMotion(
+        settings.uiPreferences.reducedMotion,
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+      );
+      section?.heading.scrollIntoView({ block: "start", behavior: reduceMotion ? "auto" : "smooth" });
     });
   });
   shadow.querySelectorAll<HTMLButtonElement>("[data-action='candidate']").forEach((button) => {
@@ -583,7 +588,13 @@ function clearRouteState(): void {
 }
 
 async function start(): Promise<void> {
-  settings = await loadSettings();
+  try {
+    settings = await loadSettings();
+  } catch {
+    // Keep the page unchanged if storage is unavailable, while preserving a
+    // responsive status channel for the popup.
+    settings = structuredClone(DEFAULT_SETTINGS);
+  }
   observer.observe(document.body, { childList: true, subtree: true });
   window.addEventListener("popstate", () => { clearRouteState(); scheduleApply(0); });
   window.addEventListener("hashchange", () => { clearRouteState(); scheduleApply(0); });

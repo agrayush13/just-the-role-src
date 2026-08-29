@@ -10,6 +10,7 @@ import {
   normalizeSettings,
   settingsFromStorageChange,
   settingsForPreset,
+  shouldReduceMotion,
 } from "../src/shared/settings";
 
 test("new installs are disabled with Balanced selected", () => {
@@ -58,6 +59,26 @@ test("schema normalization strips unknown data-boundary fields", () => {
   });
   assert.equal("jobUrl" in settings, false);
   assert.equal("description" in settings, false);
+});
+
+test("schema normalization removes duplicate keyword text and identifiers", () => {
+  const settings = normalizeSettings({
+    ...structuredClone(DEFAULT_SETTINGS),
+    keywordRules: [
+      { id: "same", text: " TypeScript ", type: "positive", matchMode: "whole-word", enabled: true },
+      { id: "other", text: "typescript", type: "neutral", matchMode: "phrase", enabled: true },
+      { id: "same", text: "system   design", type: "neutral", matchMode: "phrase", enabled: true },
+    ],
+  });
+  assert.equal(settings.keywordRules.length, 2);
+  assert.equal(settings.keywordRules[1].text, "system design");
+  assert.notEqual(settings.keywordRules[0].id, settings.keywordRules[1].id);
+});
+
+test("reduced motion respects both the system setting and explicit override", () => {
+  assert.equal(shouldReduceMotion("system", true), true);
+  assert.equal(shouldReduceMotion("system", false), false);
+  assert.equal(shouldReduceMotion("reduce", false), true);
 });
 
 test("a local storage update is applied but a local deletion is ignored", () => {

@@ -37,6 +37,8 @@ const feedback = document.querySelector<HTMLElement>("#feedback")!;
 function render(): void {
   masterToggle.checked = settings.enabled;
   presetSelect.value = settings.activePreset;
+  const customOption = presetSelect.querySelector<HTMLOptionElement>("option[value='custom']");
+  if (customOption) customOption.disabled = settings.activePreset !== "custom";
   const counts = contentStatus?.keywordCounts;
   const total = counts ? counts.positive + counts.neutral + counts.dealbreaker : 0;
   matchSummary.textContent = total

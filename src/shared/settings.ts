@@ -44,6 +44,13 @@ export interface Settings {
 
 export interface SaveResult { syncError?: string }
 
+export function shouldReduceMotion(
+  preference: Settings["uiPreferences"]["reducedMotion"],
+  systemPrefersReduced: boolean,
+): boolean {
+  return preference === "reduce" || (preference === "system" && systemPrefersReduced);
+}
+
 export const CATEGORY_LABELS: Record<CategoryKey, string> = {
   aiMatch: "AI and profile match",
   applicantInsights: "Applicant insights",
@@ -143,23 +150,36 @@ export function normalizeSettings(value: unknown): Settings {
 
   const validPreset: Preset[] = ["minimal", "balanced", "native", "custom"];
   const validBase: Settings["customBasePreset"][] = ["minimal", "balanced", "native"];
-  const keywordRules = Array.isArray(input.keywordRules)
-    ? input.keywordRules
-        .filter((rule): rule is KeywordRule => Boolean(rule && typeof rule === "object"))
-        .slice(0, 50)
-        .map((rule) => ({
-          id: typeof rule.id === "string" && rule.id ? rule.id : crypto.randomUUID(),
-          text: typeof rule.text === "string" ? rule.text.trim().slice(0, 60) : "",
-          type: (["positive", "neutral", "dealbreaker"] as const).includes(rule.type)
-            ? rule.type
-            : "neutral",
-          matchMode: (["whole-word", "phrase"] as const).includes(rule.matchMode)
-            ? rule.matchMode
-            : "whole-word",
-          enabled: bool(rule.enabled, true),
-        }))
-        .filter((rule) => rule.text)
-    : [];
+  const keywordRules: KeywordRule[] = [];
+  const seenKeywordIds = new Set<string>();
+  const seenKeywordTexts = new Set<string>();
+  if (Array.isArray(input.keywordRules)) {
+    for (const value of input.keywordRules) {
+      if (!value || typeof value !== "object") continue;
+      const rule = value as Partial<KeywordRule>;
+      const text = typeof rule.text === "string"
+        ? rule.text.trim().replace(/\s+/g, " ").slice(0, 60)
+        : "";
+      const normalizedText = text.toLocaleLowerCase();
+      if (!text || seenKeywordTexts.has(normalizedText)) continue;
+      let id = typeof rule.id === "string" && rule.id ? rule.id : crypto.randomUUID();
+      while (seenKeywordIds.has(id)) id = crypto.randomUUID();
+      keywordRules.push({
+        id,
+        text,
+        type: (["positive", "neutral", "dealbreaker"] as const).includes(rule.type as KeywordType)
+          ? rule.type as KeywordType
+          : "neutral",
+        matchMode: (["whole-word", "phrase"] as const).includes(rule.matchMode as KeywordMatchMode)
+          ? rule.matchMode as KeywordMatchMode
+          : "whole-word",
+        enabled: bool(rule.enabled, true),
+      });
+      seenKeywordIds.add(id);
+      seenKeywordTexts.add(normalizedText);
+      if (keywordRules.length === 50) break;
+    }
+  }
 
   const activePreset = validPreset.includes(input.activePreset as Preset)
     ? (input.activePreset as Preset)
