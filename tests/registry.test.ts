@@ -64,6 +64,19 @@ test("an isolated non-core module is allowed", () => {
   assert.equal(isSafeCandidate(fakeElement(), fakeElement()), true);
 });
 
+test("the job description requires an explicit safety override", () => {
+  const root = fakeElement();
+  const description = fakeElement({ matches: [DESCRIPTION_SELECTORS[0]] });
+  assert.equal(isSafeCandidate(description, root), false);
+  assert.equal(isSafeCandidate(description, root, { allowJobDescription: true }), true);
+});
+
+test("core actions remain protected when description hiding is allowed", () => {
+  const root = fakeElement();
+  const candidate = fakeElement({ descendants: [".jobs-apply-button"] });
+  assert.equal(isSafeCandidate(candidate, root, { allowJobDescription: true }), false);
+});
+
 test("the selector registry covers current regional public job pages", () => {
   assert.ok(JOB_ROOT_SELECTORS.includes(".core-rail"));
   assert.ok(TITLE_SELECTORS.includes(".top-card-layout__title"));

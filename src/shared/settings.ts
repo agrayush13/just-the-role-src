@@ -12,6 +12,7 @@ export const CATEGORY_KEYS = [
   "hiringTeam",
   "peopleConnections",
   "companyOverview",
+  "jobDescription",
   "topNavigation",
   "searchResultsPane",
 ] as const;
@@ -39,7 +40,11 @@ export interface Settings {
   readingTools: { keywordsEnabled: boolean; sectionControlsEnabled: boolean };
   searchBeta: { compactDensity: boolean; collapseViewed: boolean; collapseApplied: boolean };
   syncEnabled: boolean;
-  uiPreferences: { reducedMotion: "system" | "reduce"; controlPlacement: "inline" };
+  uiPreferences: {
+    reducedMotion: "system" | "reduce";
+    controlPlacement: "inline";
+    focusBarVisible: boolean;
+  };
 }
 
 export interface SaveResult { syncError?: string }
@@ -61,6 +66,7 @@ export const CATEGORY_LABELS: Record<CategoryKey, string> = {
   hiringTeam: "Hiring team and recruiter",
   peopleConnections: "People and connections",
   companyOverview: "Company overview",
+  jobDescription: "About the job",
   topNavigation: "Top navigation",
   searchResultsPane: "Search results pane",
 };
@@ -75,6 +81,7 @@ export const BALANCED_RULES: Record<CategoryKey, boolean> = {
   hiringTeam: false,
   peopleConnections: false,
   companyOverview: false,
+  jobDescription: false,
   topNavigation: false,
   searchResultsPane: false,
 };
@@ -89,6 +96,7 @@ export const MINIMAL_RULES: Record<CategoryKey, boolean> = {
   hiringTeam: true,
   peopleConnections: true,
   companyOverview: true,
+  jobDescription: false,
   topNavigation: false,
   searchResultsPane: false,
 };
@@ -107,7 +115,7 @@ export const DEFAULT_SETTINGS: Settings = {
   readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
   searchBeta: { compactDensity: false, collapseViewed: false, collapseApplied: false },
   syncEnabled: false,
-  uiPreferences: { reducedMotion: "system", controlPlacement: "inline" },
+  uiPreferences: { reducedMotion: "system", controlPlacement: "inline", focusBarVisible: true },
 };
 
 interface LegacySettings {
@@ -208,6 +216,7 @@ export function normalizeSettings(value: unknown): Settings {
     uiPreferences: {
       reducedMotion: input.uiPreferences?.reducedMotion === "reduce" ? "reduce" : "system",
       controlPlacement: "inline",
+      focusBarVisible: bool(input.uiPreferences?.focusBarVisible, true),
     },
   };
 }

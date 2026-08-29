@@ -9,10 +9,14 @@ const routes = new Map([
   ["/options.html", ["dist/options.html", "text/html; charset=utf-8"]],
   ["/options.css", ["dist/options.css", "text/css; charset=utf-8"]],
   ["/options.js", ["dist/options.js", "text/javascript; charset=utf-8"]],
+  ["/popup.html", ["dist/popup.html", "text/html; charset=utf-8"]],
+  ["/popup.css", ["dist/popup.css", "text/css; charset=utf-8"]],
+  ["/popup.js", ["dist/popup.js", "text/javascript; charset=utf-8"]],
   ["/privacy.html", ["dist/privacy.html", "text/html; charset=utf-8"]],
   ["/promo.html", ["store-assets/promo.html", "text/html; charset=utf-8"]],
   ["/icon-source.png", ["assets/icons/icon-source.png", "image/png"]],
   ["/icon-128.png", ["assets/icons/icon-128.png", "image/png"]],
+  ["/icon-32.png", ["assets/icons/icon-32.png", "image/png"]],
 ]);
 
 createServer((request, response) => {

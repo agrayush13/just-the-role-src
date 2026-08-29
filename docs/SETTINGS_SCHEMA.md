@@ -26,6 +26,7 @@ The versioned key and number describe storage compatibility only. They are not p
     "hiringTeam": false,
     "peopleConnections": false,
     "companyOverview": false,
+    "jobDescription": false,
     "topNavigation": false,
     "searchResultsPane": false
   },
@@ -42,7 +43,8 @@ The versioned key and number describe storage compatibility only. They are not p
   "syncEnabled": false,
   "uiPreferences": {
     "reducedMotion": "system",
-    "controlPlacement": "inline"
+    "controlPlacement": "inline",
+    "focusBarVisible": true
   }
 }
 ```
@@ -62,6 +64,7 @@ The versioned key and number describe storage compatibility only. They are not p
 | `syncEnabled` | boolean | Opt-in configuration synchronization. |
 | `uiPreferences.reducedMotion` | `system`, `reduce` | Uses system behavior or forces non-smooth in-page navigation. |
 | `uiPreferences.controlPlacement` | `inline` | Reserved, allowlisted Focus Bar placement. |
+| `uiPreferences.focusBarVisible` | boolean | Shows the on-page Focus Bar independently from Focus Mode; defaults to true. |
 
 ## Keyword rule
 
@@ -96,6 +99,7 @@ The versioned key and number describe storage compatibility only. They are not p
 | Hiring team and recruiter | false | true | false |
 | People and connections | false | true | false |
 | Company overview | false | true | false |
+| About the job | false | false | false |
 | Top navigation | false | false | false |
 | Search results pane | false | false | false |
 

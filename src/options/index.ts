@@ -166,6 +166,7 @@ function renderAll(): void {
   setCheckbox("enabled", settings.enabled);
   setCheckbox("keywords-enabled", settings.readingTools.keywordsEnabled);
   setCheckbox("sections-enabled", settings.readingTools.sectionControlsEnabled);
+  setCheckbox("focus-bar-visible", settings.uiPreferences.focusBarVisible);
   setCheckbox("sync-enabled", settings.syncEnabled);
   setCheckbox("compact-density", settings.searchBeta.compactDensity);
   setCheckbox("collapse-viewed", settings.searchBeta.collapseViewed);
@@ -210,6 +211,7 @@ document.querySelector("#cancel-edit")!.addEventListener("click", resetKeywordFo
 bindBoolean("enabled", (checked) => ({ ...settings, enabled: checked }));
 bindBoolean("keywords-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, keywordsEnabled: checked } }));
 bindBoolean("sections-enabled", (checked) => ({ ...settings, readingTools: { ...settings.readingTools, sectionControlsEnabled: checked } }));
+bindBoolean("focus-bar-visible", (checked) => ({ ...settings, uiPreferences: { ...settings.uiPreferences, focusBarVisible: checked } }));
 bindBoolean("sync-enabled", (checked) => ({ ...settings, syncEnabled: checked }));
 bindBoolean("compact-density", (checked) => ({ ...settings, searchBeta: { ...settings.searchBeta, compactDensity: checked } }));
 bindBoolean("collapse-viewed", (checked) => ({ ...settings, searchBeta: { ...settings.searchBeta, collapseViewed: checked } }));

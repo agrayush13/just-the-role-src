@@ -23,6 +23,16 @@ test("new installs are disabled with Balanced selected", () => {
     collapseViewed: false,
     collapseApplied: false,
   });
+  assert.equal(settings.uiPreferences.focusBarVisible, true);
+});
+
+test("the on-page widget preference is normalized and can be hidden independently", () => {
+  const settings = normalizeSettings({
+    ...structuredClone(DEFAULT_SETTINGS),
+    uiPreferences: { ...DEFAULT_SETTINGS.uiPreferences, focusBarVisible: false },
+  });
+  assert.equal(settings.enabled, false);
+  assert.equal(settings.uiPreferences.focusBarVisible, false);
 });
 
 test("legacy settings migrate to Custom without changing effective visibility", () => {
@@ -40,6 +50,18 @@ test("preset resolution is deterministic and does not mutate defaults", () => {
   assert.deepEqual(settings.moduleRules, MINIMAL_RULES);
   settings.moduleRules.aiMatch = false;
   assert.equal(MINIMAL_RULES.aiMatch, true);
+});
+
+test("About the job remains visible in every built-in preset", () => {
+  assert.equal(BALANCED_RULES.jobDescription, false);
+  assert.equal(MINIMAL_RULES.jobDescription, false);
+  assert.equal(settingsForPreset(structuredClone(DEFAULT_SETTINGS), "native").moduleRules.jobDescription, false);
+});
+
+test("About the job can be hidden only through an explicit Custom choice", () => {
+  const custom = customizeModule(structuredClone(DEFAULT_SETTINGS), "jobDescription", true);
+  assert.equal(custom.activePreset, "custom");
+  assert.equal(custom.moduleRules.jobDescription, true);
 });
 
 test("a module change produces Custom and remembers its base preset", () => {

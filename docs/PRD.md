@@ -40,15 +40,15 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-06:** Balanced, Minimal, and Native views must resolve to deterministic category rules.
 - **FR-07:** Changing an individual category must create a Custom view and remember its source preset.
 - **FR-08:** Custom must not be offered as a new blank preset; it exists only after customization or migration.
-- **FR-09:** The Focus Bar must support view switching, temporary original-page display, one-step undo, source-preset restoration, and keyword-settings access.
-- **FR-10:** The page-block picker must expose only detected, supported, non-essential categories and provide direct pointer selection plus a keyboard-operable modal list.
+- **FR-09:** The Focus Bar must support view switching, temporary original-page display, one-step undo, source-preset restoration, and keyword-settings access. It must render immediately before the first recognized AI/profile-match card, falling back to immediately before About the job when no such card is present.
+- **FR-10:** The page-block picker must expose only detected, supported categories and provide direct pointer selection plus a keyboard-operable modal list. About the job is available only as an explicit Custom choice and remains visible in every built-in preset.
 - **FR-11:** Customization may persist only the category toggle, never raw page text, a DOM path, or element identity.
 
 ### DOM safety and restoration
 
 - **FR-12:** Selector rules must be centralized, versioned, and evaluated independently.
 - **FR-13:** A candidate must not be hidden when it is the job root, contains the job root, matches a protected anchor, or contains a protected anchor.
-- **FR-14:** Protected anchors must include title, description, Apply, Save, company/location context, Share, Report, navigation, and account controls.
+- **FR-14:** Always-protected anchors must include title, Apply, Save, company/location context, Share, Report, navigation, and account controls. The description must remain protected from every general module rule and may be hidden only by the dedicated About the job rule after an explicit Custom choice.
 - **FR-15:** Hiding must use extension-owned attributes and preserve an element's previous `aria-hidden` state.
 - **FR-16:** Disabling Focus Mode or selecting Show original must remove all extension-owned layout, marker, section, picker, and search-list changes.
 
@@ -92,6 +92,11 @@ The primary user is an individual reviewing job opportunities on desktop Chrome.
 - **FR-40:** Motion must follow the user's reduced-motion preference.
 - **FR-41:** Light and dark page contexts must retain legible controls and markers.
 - **FR-42:** A storage read failure must leave the page unchanged and the content script responsive.
+- **FR-43:** The Focus Bar must show the packaged JustTheRole logo immediately before the product name.
+- **FR-44:** The Focus Bar must detect the rendered page's light or dark appearance, apply the corresponding extension palette, and update when the page theme changes.
+- **FR-45:** Users must be able to hide or show the on-page Focus Bar from both the popup and full settings without disabling Focus Mode or changing page-cleanup behavior. The preference must default to visible and persist through the normalized settings boundary.
+- **FR-46:** The Focus Bar must group branding, view selection, actions, and status predictably so narrower containers wrap at intentional group boundaries.
+- **FR-47:** The options page must use available horizontal space before wrapping hero and explanatory copy, while retaining a deliberate stacked layout at the narrow breakpoint.
 
 ## Acceptance criteria
 
@@ -101,7 +106,9 @@ A release candidate is acceptable when:
 - the sanitized fixture verifies hiding, highlighting, section controls, search cleanup, picker access, and complete restoration;
 - the store package contains one root manifest and no development-only files;
 - manual signed-in checks cover direct job pages and split search/detail views on current LinkedIn markup;
-- Apply, Save, Share, Report, title, company/location context, and description remain usable in every view;
+- Apply, Save, Share, Report, title, and company/location context remain usable in every view; About the job remains visible in every built-in preset and is restored after its explicit Custom hiding choice is reversed;
+- the Focus Bar appears before the recognized AI/profile-match card, includes the packaged logo, follows both light and dark page themes, and can be hidden independently from the popup or settings;
+- desktop options layouts use available space without premature wrapping, while narrow layouts stack without horizontal overflow;
 - disabling Focus Mode and Show original leave no extension DOM mutations;
 - storage and diagnostics inspection confirms that no job or account data is retained.
 

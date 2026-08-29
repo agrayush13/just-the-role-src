@@ -1,4 +1,4 @@
-import { isSafeCandidate } from "./registry";
+import { isSafeCandidate, type CandidateSafetyOptions } from "./registry";
 
 function outermost(elements: readonly Element[]): Element[] {
   return elements.filter(
@@ -14,22 +14,37 @@ function hasMeaningfulSibling(element: Element): boolean {
   );
 }
 
-function expandThroughWrapperShells(candidate: Element, jobRoot: Element): Element {
+function expandThroughWrapperShells(
+  candidate: Element,
+  jobRoot: Element,
+  options: CandidateSafetyOptions,
+): Element {
   let current = candidate;
   while (current.parentElement && current.parentElement !== jobRoot) {
     const parent = current.parentElement;
-    if (hasMeaningfulSibling(current) || !isSafeCandidate(parent, jobRoot)) break;
+    if (hasMeaningfulSibling(current) || !isSafeCandidate(parent, jobRoot, options)) break;
     current = parent;
   }
   return current;
 }
 
-export function resolveSafeModuleCandidates(matches: Iterable<Element>, jobRoot: Element): Element[] {
-  const safeMatches = [...matches].filter((candidate) => isSafeCandidate(candidate, jobRoot));
+export function resolveSafeModuleCandidates(
+  matches: Iterable<Element>,
+  jobRoot: Element,
+  options: CandidateSafetyOptions = {},
+): Element[] {
+  const safeMatches = [...matches].filter((candidate) => isSafeCandidate(candidate, jobRoot, options));
   const expanded = new Set(
     outermost(safeMatches)
-      .map((candidate) => expandThroughWrapperShells(candidate, jobRoot))
-      .filter((candidate) => isSafeCandidate(candidate, jobRoot)),
+      .map((candidate) => expandThroughWrapperShells(candidate, jobRoot, options))
+      .filter((candidate) => isSafeCandidate(candidate, jobRoot, options)),
   );
   return outermost([...expanded]);
+}
+
+export function chooseFocusBarAnchor(
+  aiMatchCandidates: readonly Element[],
+  description: Element,
+): Element {
+  return aiMatchCandidates[0] ?? description;
 }

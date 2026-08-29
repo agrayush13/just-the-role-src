@@ -26,6 +26,7 @@
           aiMatch: true, applicantInsights: false, premiumUpsells: true,
           recommendations: true, footerPromotions: true, applicantCount: false,
           hiringTeam: false, peopleConnections: false, companyOverview: false,
+          jobDescription: false,
           topNavigation: false, searchResultsPane: false
         },
         keywordRules: [
@@ -35,7 +36,7 @@
         readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
         searchBeta: { compactDensity: true, collapseViewed: true, collapseApplied: true },
         syncEnabled: false,
-        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline" }
+        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline", focusBarVisible: true }
       };
       window.chrome = {
         storage: {
@@ -46,6 +47,7 @@
         runtime: {
           onMessage: { addListener: () => {} },
           openOptionsPage: async () => {},
+          getURL: (path) => `/${path.replace(/^icons\//, "")}`,
           getManifest: () => ({ version: "0.3.0" })
         }
       };

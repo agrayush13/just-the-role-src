@@ -33,6 +33,7 @@ let activatedWithoutReload = false;
 let activationFailed = false;
 
 const masterToggle = document.querySelector<HTMLInputElement>("#master-toggle")!;
+const focusBarToggle = document.querySelector<HTMLInputElement>("#focus-bar-visible")!;
 const presetSelect = document.querySelector<HTMLSelectElement>("#preset")!;
 const pageStatus = document.querySelector<HTMLElement>("#page-status")!;
 const matchSummary = document.querySelector<HTMLElement>("#match-summary")!;
@@ -40,6 +41,7 @@ const feedback = document.querySelector<HTMLElement>("#feedback")!;
 
 function render(): void {
   masterToggle.checked = settings.enabled;
+  focusBarToggle.checked = settings.uiPreferences.focusBarVisible;
   presetSelect.value = settings.activePreset;
   const customOption = presetSelect.querySelector<HTMLOptionElement>("option[value='custom']");
   if (customOption) customOption.disabled = settings.activePreset !== "custom";
@@ -109,6 +111,14 @@ masterToggle.addEventListener("change", async () => {
   await persist();
 });
 
+focusBarToggle.addEventListener("change", async () => {
+  settings = {
+    ...settings,
+    uiPreferences: { ...settings.uiPreferences, focusBarVisible: focusBarToggle.checked },
+  };
+  await persist();
+});
+
 presetSelect.addEventListener("change", async () => {
   settings = settingsForPreset(settings, presetSelect.value as Preset);
   render();
@@ -125,6 +135,7 @@ document.querySelector("#copy-diagnostics")?.addEventListener("click", async () 
     settingsSchemaVersion: settings.schemaVersion,
     enabled: settings.enabled,
     activePreset: settings.activePreset,
+    focusBarVisible: settings.uiPreferences.focusBarVisible,
     pageStatus: contentStatus?.pageStatus ?? "unavailable",
     temporaryOriginal: contentStatus?.temporaryOriginal ?? false,
     selectorMapVersion: contentStatus?.selectorMapVersion ?? "unavailable",

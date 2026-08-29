@@ -41,8 +41,8 @@ At startup, the content script loads normalized settings. If storage cannot be r
 
 Each apply pass:
 
-1. records scroll position and detects a rendered job root, title, and description;
-2. removes every extension-owned mutation from the previous pass;
+1. records scroll position and removes every extension-owned mutation from the previous pass;
+2. detects a rendered job root, title, and description from the restored page;
 3. resets transient diagnostics;
 4. when Focus Mode is active and original view is not requested, applies layout rules, keyword markers, section controls, and search cleanup;
 5. renders or removes the Focus Bar;
@@ -62,7 +62,9 @@ Section and search transformations also use extension-owned data attributes. No 
 
 ## Focus Bar isolation
 
-The Focus Bar is a single host inserted before the description. Its open Shadow DOM contains scoped styles and native controls. Employer-provided section labels are escaped before template interpolation. The host and injected controls carry extension-owned markers so mutation handling and highlighting exclude them.
+The Focus Bar is a single host inserted before the first recognized AI/profile-match module, with the description as its fallback anchor. Its open Shadow DOM contains scoped styles, extension theme tokens, the packaged 32px logo, and native controls. The content script derives a light/dark mode from the nearest opaque page background and watches page theme attributes so the palette stays aligned with LinkedIn. Employer-provided section labels are escaped before template interpolation. The host and injected controls carry extension-owned markers so mutation handling and highlighting exclude them.
+
+`uiPreferences.focusBarVisible` controls only host rendering. Page transformations continue when the host is hidden, and storage changes restore it immediately without requiring a page reload.
 
 ## Settings and messaging
 
@@ -77,6 +79,7 @@ Storage events update open job pages immediately. Sync events are ignored unless
 - Persisted settings are rebuilt from an allowlist; unknown fields are discarded.
 - Untrusted labels are escaped before template interpolation.
 - Core controls and content are protected at the selector boundary.
+- The only web-accessible packaged asset is the 32px brand icon. Chrome requires web-accessible resource matches to use an origin-wide `/*` path, so the icon is available on LinkedIn origins while content-script execution and host access remain restricted to LinkedIn Jobs paths.
 - The store archive excludes source maps, source, tests, dependencies, and hidden files.
 
 ## Testing strategy

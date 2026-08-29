@@ -1,6 +1,6 @@
 # JustTheRole
 
-JustTheRole is a privacy-first Chrome extension that turns supported LinkedIn Jobs pages into a calmer, personal reading view. It hides only recognized, non-essential page blocks, marks words and phrases the user defines, adds navigation for reliably detected description sections, and can reduce clutter in a search-results list.
+JustTheRole is a privacy-first Chrome extension that turns supported LinkedIn Jobs pages into a calmer, personal reading view. It hides recognized page blocks selected by the user, marks words and phrases the user defines, adds navigation for reliably detected description sections, and can reduce clutter in a search-results list.
 
 The extension is deterministic and visual-only. It does not scrape jobs, summarize or score descriptions, automate LinkedIn actions, collect analytics, store job content, or make extension-initiated network requests.
 
@@ -13,7 +13,7 @@ Focus Mode is off on a fresh install. After the user enables it, JustTheRole app
 - **Native** leaves LinkedIn page modules visible while retaining separately enabled reading tools.
 - **Custom** is created automatically when the user changes an individual supported category.
 
-On a supported job detail view, the in-page Focus Bar lets the user switch views without reloading, temporarily show the original page, undo the latest view change, restore the preset behind a Custom view, and open a safe page-block picker. Core content and actions—including the title, company/location context, description, Apply, Save, Share, and Report—are protected from hiding.
+On a supported job detail view, the branded in-page Focus Bar appears before the AI/profile-match module when present and lets the user switch views without reloading, temporarily show the original page, undo the latest view change, restore the preset behind a Custom view, and open a safe page-block picker. It follows the page's light or dark appearance using the extension palette and can be hidden independently from the popup or full settings without disabling cleanup. The title, company/location context, Apply, Save, Share, and Report remain protected. About the job can be hidden only through an explicit Custom choice and remains visible in every built-in preset.
 
 Opening the toolbar popup can also activate the bundled content script and stylesheet on an already-open LinkedIn Jobs tab. This covers installation and extension-reload cases without requiring the user to refresh the job page.
 
@@ -26,7 +26,7 @@ Optional reading tools provide:
 
 ## Privacy and safety
 
-Only extension configuration is stored: the Focus Mode switch, selected view, module choices, keyword rules, reading-tool preferences, search-list preferences, and UI preferences. Chrome Sync is optional and off by default. When enabled, the same configuration—including potentially sensitive keyword rules—may be synchronized through the user's Chrome account; the local copy remains available if Sync fails.
+Only extension configuration is stored: the Focus Mode switch, selected view, module choices, keyword rules, reading-tool preferences, search-list preferences, and UI preferences such as on-page widget visibility. Chrome Sync is optional and off by default. When enabled, the same configuration—including potentially sensitive keyword rules—may be synchronized through the user's Chrome account; the local copy remains available if Sync fails.
 
 JustTheRole does not store page text, job URLs, titles, companies, profile or account details, resumes, applications, search terms, browsing history, or derived scores. The manifest requests Chrome storage, narrowly scoped LinkedIn Jobs access, and user-initiated active-tab scripting so the packaged code can activate on an already-open job tab. The content script does not run on non-Jobs paths.
 

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Window } from "happy-dom";
-import { resolveSafeModuleCandidates } from "../src/content/candidates";
+import { chooseFocusBarAnchor, resolveSafeModuleCandidates } from "../src/content/candidates";
 
 function fixture(): { document: Document; root: Element } {
   const window = new Window();
@@ -61,4 +61,20 @@ test("card-shell expansion never crosses meaningful sibling content", () => {
   const [resolved] = resolveSafeModuleCandidates([candidate], root);
   assert.equal(resolved, shell);
   assert.equal(group.contains(resolved), true);
+});
+
+test("the Focus Bar anchors before AI match and falls back to About the job", () => {
+  const { document } = fixture();
+  const aiMatch = document.querySelector(".visual-card-shell")!;
+  const description = document.querySelector("[id^='JobDetails_AboutTheJob_']")!;
+  const host = document.createElement("div");
+
+  const primaryAnchor = chooseFocusBarAnchor([aiMatch], description);
+  primaryAnchor.before(host);
+  assert.equal(aiMatch.previousElementSibling, host);
+
+  host.remove();
+  const fallbackAnchor = chooseFocusBarAnchor([], description);
+  fallbackAnchor.before(host);
+  assert.equal(description.previousElementSibling, host);
 });

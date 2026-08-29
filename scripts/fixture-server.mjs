@@ -6,6 +6,7 @@ const routes = new Map([
   ["/jobs/view/fixture", ["tests/fixtures/job-page.html", "text/html; charset=utf-8"]],
   ["/content.js", ["dist/content.js", "text/javascript; charset=utf-8"]],
   ["/content.css", ["dist/content.css", "text/css; charset=utf-8"]],
+  ["/icon-32.png", ["assets/icons/icon-32.png", "image/png"]],
 ]);
 
 createServer((request, response) => {

@@ -6,15 +6,15 @@ These answers reflect the extension code in this repository. Keep the dashboard 
 
 ### Single purpose description
 
-> JustTheRole provides a user-controlled focus and reading layer on LinkedIn Jobs pages by hiding selected nonessential modules and locally highlighting user-defined criteria while preserving core job content and actions.
+> JustTheRole provides a user-controlled focus and reading layer on LinkedIn Jobs pages by hiding selected recognized page blocks and locally highlighting user-defined criteria while preserving the title, company context, and application actions.
 
 ### Host permission justification
 
-> The extension runs its bundled content script and stylesheet only on LinkedIn Jobs paths matching https://*.linkedin.com/jobs/*, including regional LinkedIn hosts, so it can locally identify supported job-description sections, hide user-selected nonessential modules, highlight user-defined keywords, and add reversible focus controls. The content script does not run on non-Jobs paths. It does not submit applications, read cookies, or transmit page data.
+> The extension runs its bundled content script and stylesheet only on LinkedIn Jobs paths matching https://*.linkedin.com/jobs/*, including regional LinkedIn hosts, so it can locally identify supported page blocks, apply the user's visibility choices, highlight user-defined keywords, and add reversible focus controls. The content script does not run on non-Jobs paths. It does not submit applications, read cookies, or transmit page data.
 
 ### Storage permission justification
 
-> The storage permission saves only the extension's configuration: whether Focus Mode is enabled, preset and category choices, keyword rules, reading-tool preferences, and search-list preferences. Settings are local by default. Chrome Sync is used only when the user explicitly enables it. Job descriptions, URLs, account data, resumes, and application data are never stored.
+> The storage permission saves only the extension's configuration: whether Focus Mode is enabled, preset and category choices, keyword rules, reading-tool preferences, on-page widget visibility, and search-list preferences. Settings are local by default. Chrome Sync is used only when the user explicitly enables it. Job descriptions, URLs, account data, resumes, and application data are never stored.
 
 ### Active tab permission justification
 

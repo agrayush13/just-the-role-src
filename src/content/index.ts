@@ -23,13 +23,15 @@ import {
   MODULE_RULES,
   SELECTOR_MAP_VERSION,
   TITLE_SELECTORS,
+  type ModuleRule,
 } from "./registry";
 import { highlightDescriptionText, KEYWORD_MARK_ATTR, restoreKeywordHighlights } from "./keyword-dom";
 import { isSponsoredLabel, recognizedCardStatus } from "./search-beta";
 import { isRendered } from "./visibility";
-import { resolveSafeModuleCandidates } from "./candidates";
+import { chooseFocusBarAnchor, resolveSafeModuleCandidates } from "./candidates";
 
 const CONTROL_HOST_ID = "just-the-role-control";
+const BRAND_ICON_URL = chrome.runtime.getURL("icons/icon-32.png");
 const HIDDEN_ATTR = "data-jtr-hidden";
 const CATEGORY_ATTR = "data-jtr-category";
 const PREVIOUS_ARIA_ATTR = "data-jtr-previous-aria-hidden";
@@ -261,16 +263,28 @@ function applySearchBeta(): void {
 function collectCandidates(view: JobView): Map<CategoryKey, HTMLElement[]> {
   const candidates = new Map<CategoryKey, HTMLElement[]>();
   for (const rule of MODULE_RULES.filter((item) => item.selectable)) {
-    const matches = new Set<HTMLElement>();
-    for (const selector of rule.selectors) {
-      document.querySelectorAll<HTMLElement>(selector).forEach((candidate) => matches.add(candidate));
-    }
-    const safeMatches = resolveSafeModuleCandidates(matches, view.root).filter(
-      (candidate): candidate is HTMLElement => candidate instanceof HTMLElement,
-    );
+    const safeMatches = candidatesForRule(rule, view);
     if (safeMatches.length) candidates.set(rule.category, safeMatches);
   }
   return candidates;
+}
+
+function candidatesForRule(rule: ModuleRule, view: JobView): HTMLElement[] {
+  const matches = new Set<Element>();
+  for (const selector of rule.selectors) {
+    document.querySelectorAll(selector).forEach((candidate) => matches.add(candidate));
+  }
+  return resolveSafeModuleCandidates(matches, view.root, {
+    allowJobDescription: rule.allowJobDescription,
+  }).filter((candidate): candidate is HTMLElement => candidate instanceof HTMLElement);
+}
+
+function focusBarAnchor(view: JobView): Element {
+  const aiMatchRule = MODULE_RULES.find((rule) => rule.category === "aiMatch");
+  return chooseFocusBarAnchor(
+    aiMatchRule ? candidatesForRule(aiMatchRule, view) : [],
+    view.description,
+  );
 }
 
 function cancelPicker(): void {
@@ -324,26 +338,52 @@ function startPicker(view: JobView): void {
 
 function controlStyles(): string {
   return `
-    :host { all: initial; color-scheme: light; }
-    :host([data-jtr-theme="dark"]) { color-scheme: dark; }
+    :host {
+      all: initial;
+      color-scheme: light;
+      --jtr-bg: #f6f4ef;
+      --jtr-surface: #ffffff;
+      --jtr-text: #17201c;
+      --jtr-muted: #5b6862;
+      --jtr-border: #d9d8d2;
+      --jtr-accent: #276749;
+      --jtr-accent-soft: #e3eee7;
+      --jtr-focus: #8cc6ab;
+    }
+    :host([data-jtr-theme="dark"]) {
+      color-scheme: dark;
+      --jtr-bg: #17201c;
+      --jtr-surface: #1f2b25;
+      --jtr-text: #f2f4f2;
+      --jtr-muted: #bbc5bf;
+      --jtr-border: #3a4841;
+      --jtr-accent: #8cc6ab;
+      --jtr-accent-soft: #25352e;
+      --jtr-focus: #a8dfc4;
+    }
     * { box-sizing: border-box; }
-    .bar { margin: 12px 0; padding: 10px 12px; border: 1px solid color-mix(in srgb, CanvasText 18%, transparent); border-radius: 12px; background: Canvas; color: CanvasText; font: 600 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-    .row, .nav, .counts, .search { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-    .brand { margin-right: auto; letter-spacing: -.01em; }
-    button, select { min-height: 34px; padding: 5px 9px; border: 1px solid color-mix(in srgb, CanvasText 34%, transparent); border-radius: 8px; background: Canvas; color: CanvasText; font: inherit; cursor: pointer; }
-    button:hover { background: color-mix(in srgb, CanvasText 8%, Canvas); }
-    button:focus-visible, select:focus-visible { outline: 3px solid #70b5f9; outline-offset: 2px; }
-    .primary { border-color: #0a66c2; color: #0a66c2; }
-    .status { margin: 7px 0 0; color: GrayText; font-weight: 400; }
+    .bar { margin: 12px 0; padding: 12px; border: 1px solid var(--jtr-border); border-radius: 14px; background: var(--jtr-surface); color: var(--jtr-text); box-shadow: 0 8px 24px rgb(23 32 28 / .08); font: 600 13px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    .bar-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: inline-flex; align-items: center; gap: 8px; min-width: max-content; letter-spacing: -.01em; }
+    .brand img { width: 24px; height: 24px; border-radius: 6px; }
+    .preset { display: inline-flex; align-items: center; gap: 6px; }
+    .actions, .nav, .counts, .search { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .actions { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--jtr-border); }
+    button, select { min-height: 34px; padding: 5px 9px; border: 1px solid var(--jtr-border); border-radius: 8px; background: var(--jtr-bg); color: var(--jtr-text); font: inherit; cursor: pointer; }
+    button:hover { background: var(--jtr-accent-soft); }
+    button:focus-visible, select:focus-visible { outline: 3px solid var(--jtr-focus); outline-offset: 2px; }
+    .primary { border-color: var(--jtr-accent); background: var(--jtr-accent); color: #fff; }
+    :host([data-jtr-theme="dark"]) .primary { color: #17201c; }
+    .status { margin: 9px 0 0; color: var(--jtr-muted); font-weight: 400; }
     .status:empty, [hidden] { display: none !important; }
-    .nav, .counts, .search { margin-top: 8px; padding-top: 8px; border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent); }
-    .label { color: GrayText; font-size: 12px; font-weight: 500; }
-    .count { padding: 3px 7px; border-radius: 99px; background: color-mix(in srgb, CanvasText 8%, Canvas); font-size: 11px; }
-    dialog { width: min(480px, calc(100vw - 32px)); max-height: 70vh; padding: 0; border: 1px solid color-mix(in srgb, CanvasText 22%, transparent); border-radius: 14px; background: Canvas; color: CanvasText; }
+    .nav, .counts, .search { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--jtr-border); }
+    .label { color: var(--jtr-muted); font-size: 12px; font-weight: 500; }
+    .count { padding: 3px 7px; border-radius: 99px; background: var(--jtr-accent-soft); font-size: 11px; }
+    dialog { width: min(480px, calc(100vw - 32px)); max-height: 70vh; padding: 0; border: 1px solid var(--jtr-border); border-radius: 14px; background: var(--jtr-surface); color: var(--jtr-text); }
     dialog::backdrop { background: rgb(0 0 0 / .35); }
     .dialog-inner { padding: 18px; font: 500 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
     .dialog-inner h2 { margin: 0 0 6px; font-size: 18px; }
-    .dialog-inner p { margin: 0 0 12px; color: GrayText; }
+    .dialog-inner p { margin: 0 0 12px; color: var(--jtr-muted); }
     .candidate-list { display: grid; gap: 7px; margin-bottom: 12px; }
     .candidate-list button { text-align: left; }
     @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
@@ -368,7 +408,7 @@ function pageTheme(element: Element): "light" | "dark" {
 
 function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTMLElement[]>): void {
   let host = document.getElementById(CONTROL_HOST_ID);
-  if (!settings.enabled || !view) {
+  if (!settings.enabled || !settings.uiPreferences.focusBarVisible || !view) {
     host?.remove();
     return;
   }
@@ -378,10 +418,11 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
     host.setAttribute("data-jtr-ui", "true");
     host.attachShadow({ mode: "open" });
   }
-  if (host.parentElement !== view.description.parentElement || host.nextElementSibling !== view.description) {
-    view.description.before(host);
+  const anchor = focusBarAnchor(view);
+  if (host.parentElement !== anchor.parentElement || host.nextElementSibling !== anchor) {
+    anchor.before(host);
   }
-  host.dataset.jtrTheme = pageTheme(view.description);
+  host.dataset.jtrTheme = pageTheme(anchor);
   const shadow = host.shadowRoot!;
   const countSummary = Object.entries(keywordCounts)
     .filter(([, count]) => count > 0)
@@ -403,13 +444,15 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
   shadow.innerHTML = `
     <style>${controlStyles()}</style>
     <section class="bar" aria-label="JustTheRole Focus Bar">
-      <div class="row">
-        <span class="brand">JustTheRole</span>
-        <label><span class="label">View </span>
+      <div class="bar-header">
+        <span class="brand"><img src="${BRAND_ICON_URL}" alt="" width="24" height="24" />JustTheRole</span>
+        <label class="preset"><span class="label">View</span>
           <select data-action="preset" aria-label="Focus preset">
             ${(["minimal", "balanced", "native", "custom"] as Preset[]).map((preset) => `<option value="${preset}" ${settings.activePreset === preset ? "selected" : ""} ${preset === "custom" && settings.activePreset !== "custom" ? "disabled" : ""}>${preset[0].toUpperCase()}${preset.slice(1)}</option>`).join("")}
           </select>
         </label>
+      </div>
+      <div class="actions">
         <button class="primary" type="button" data-action="customize">Customize page</button>
         <button type="button" data-action="keywords">Keywords</button>
         <button type="button" data-action="original">${temporaryOriginal ? "Resume focus" : "Show original"}</button>
@@ -424,7 +467,7 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
     <dialog aria-labelledby="jtr-picker-title">
       <div class="dialog-inner">
         <h2 id="jtr-picker-title">Customize this page</h2>
-        <p>Only supported, non-essential categories are available. No page text or DOM path is saved.</p>
+        <p>Only supported categories are available. No page text or DOM path is saved.</p>
         <div class="candidate-list">${pickerList || "<span>No supported blocks detected.</span>"}</div>
         <button type="button" data-action="cancel-picker">Cancel</button>
       </div>
@@ -487,11 +530,7 @@ function renderFocusBar(view: JobView | null, candidates?: Map<CategoryKey, HTML
 function applyLayout(view: JobView): void {
   const detected = new Set<CategoryKey>();
   for (const rule of MODULE_RULES) {
-    const matches = new Set<Element>();
-    for (const selector of rule.selectors) document.querySelectorAll(selector).forEach((element) => matches.add(element));
-    const safeMatches = resolveSafeModuleCandidates(matches, view.root).filter(
-      (candidate): candidate is HTMLElement => candidate instanceof HTMLElement,
-    );
+    const safeMatches = candidatesForRule(rule, view);
     if (safeMatches.length) detected.add(rule.category);
     if (!settings.moduleRules[rule.category]) continue;
     for (const candidate of safeMatches) {
@@ -513,15 +552,17 @@ function restoreAllMutations(): void {
 function applyFocusMode(): void {
   const started = performance.now();
   const scrollTop = document.scrollingElement?.scrollTop ?? 0;
+  restoreAllMutations();
   const view = detectJobView();
   pageStatus = view ? "supported" : location.pathname.startsWith("/jobs") ? "waiting" : "unsupported";
-  restoreAllMutations();
   diagnostics = { applyMs: 0, keywordMs: 0, detectedModuleIds: [], sectionCount: 0 };
 
   if (view && settings.enabled && !temporaryOriginal) {
     applyLayout(view);
-    applyKeywords(view);
-    applySections(view);
+    if (!settings.moduleRules.jobDescription) {
+      applyKeywords(view);
+      applySections(view);
+    }
     applySearchBeta();
   }
   renderFocusBar(view);
@@ -553,6 +594,14 @@ const observer = new MutationObserver((mutations) => {
   });
   if (relevant) scheduleApply();
 });
+
+function refreshFocusBarTheme(): void {
+  const host = document.getElementById(CONTROL_HOST_ID);
+  const view = host ? detectJobView() : null;
+  if (host && view) host.dataset.jtrTheme = pageTheme(focusBarAnchor(view));
+}
+
+const themeObserver = new MutationObserver(refreshFocusBarTheme);
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (!changes[SETTINGS_KEY]) return;
@@ -598,6 +647,15 @@ async function start(): Promise<void> {
     settings = structuredClone(DEFAULT_SETTINGS);
   }
   observer.observe(document.body, { childList: true, subtree: true });
+  themeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class", "style", "data-theme", "data-color-scheme"],
+  });
+  themeObserver.observe(document.body, {
+    attributes: true,
+    attributeFilter: ["class", "style", "data-theme", "data-color-scheme"],
+  });
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", refreshFocusBarTheme);
   window.addEventListener("popstate", () => { clearRouteState(); scheduleApply(0); });
   window.addEventListener("hashchange", () => { clearRouteState(); scheduleApply(0); });
   window.setInterval(() => {

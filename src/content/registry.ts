@@ -4,11 +4,26 @@ export interface ModuleRule {
   category: CategoryKey;
   selectors: readonly string[];
   selectable: boolean;
+  allowJobDescription?: boolean;
+}
+
+export interface CandidateSafetyOptions {
+  allowJobDescription?: boolean;
 }
 
 // Conservative selectors only. Each match is independently safety-checked before hiding.
 // Keep this registry centralized and versioned so LinkedIn changes are easy to audit.
-export const SELECTOR_MAP_VERSION = "2026-08-29.4";
+export const SELECTOR_MAP_VERSION = "2026-08-29.6";
+
+export const DESCRIPTION_SELECTORS = [
+  "#job-details",
+  ".jobs-description",
+  ".description",
+  ".jobs-box__html-content",
+  "[data-view-name='job-description']",
+  "[id^='JobDetails_AboutTheJob_']",
+  "[data-sdui-component$='.aboutTheJob']",
+] as const;
 
 export const MODULE_RULES: readonly ModuleRule[] = [
   {
@@ -109,6 +124,12 @@ export const MODULE_RULES: readonly ModuleRule[] = [
     ],
   },
   {
+    category: "jobDescription",
+    selectable: true,
+    allowJobDescription: true,
+    selectors: DESCRIPTION_SELECTORS,
+  },
+  {
     category: "topNavigation",
     selectable: false,
     selectors: ["header.global-nav", ".global-nav"],
@@ -141,25 +162,14 @@ export const TITLE_SELECTORS = [
   "[data-sdui-screen='com.linkedin.sdui.flagshipnav.jobs.SemanticJobDetails'] a[href*='/jobs/view/']",
 ] as const;
 
-export const DESCRIPTION_SELECTORS = [
-  "#job-details",
-  ".jobs-description",
-  ".description",
-  ".jobs-box__html-content",
-  "[data-view-name='job-description']",
-  "[id^='JobDetails_AboutTheJob_']",
-  "[data-sdui-component$='.aboutTheJob']",
-] as const;
-
 export const DESCRIPTION_CONTENT_SELECTORS = [
   ".jobs-box__html-content",
   ".show-more-less-html__markup",
   "[data-sdui-component$='.aboutTheJob']",
 ] as const;
 
-export const PROTECTED_SELECTORS = [
+export const ALWAYS_PROTECTED_SELECTORS = [
   ...TITLE_SELECTORS,
-  ...DESCRIPTION_SELECTORS,
   ".jobs-apply-button",
   ".jobs-save-button",
   "a[aria-label='Apply on company website']",
@@ -175,9 +185,21 @@ export const PROTECTED_SELECTORS = [
   "[data-control-name*='account']",
 ] as const;
 
-export function isSafeCandidate(candidate: Element, jobRoot: Element): boolean {
+export const PROTECTED_SELECTORS = [
+  ...ALWAYS_PROTECTED_SELECTORS,
+  ...DESCRIPTION_SELECTORS,
+] as const;
+
+export function isSafeCandidate(
+  candidate: Element,
+  jobRoot: Element,
+  options: CandidateSafetyOptions = {},
+): boolean {
+  const protectedSelectors = options.allowJobDescription
+    ? ALWAYS_PROTECTED_SELECTORS
+    : PROTECTED_SELECTORS;
   if (candidate === jobRoot || candidate.contains(jobRoot)) return false;
-  if (PROTECTED_SELECTORS.some((selector) => candidate.matches(selector))) return false;
-  if (PROTECTED_SELECTORS.some((selector) => candidate.querySelector(selector))) return false;
+  if (protectedSelectors.some((selector) => candidate.matches(selector))) return false;
+  if (protectedSelectors.some((selector) => candidate.querySelector(selector))) return false;
   return true;
 }

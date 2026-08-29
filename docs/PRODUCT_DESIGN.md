@@ -44,7 +44,7 @@ Search cleanup is visually separated as an optional beta and starts off. Explici
 
 ### Popup
 
-The popup is the quick control surface: current-page status, Focus Mode, view selection, a compact reading summary, full-settings access, and privacy-safe diagnostics.
+The popup is the quick control surface: current-page status, Focus Mode, view selection, a compact reading summary, an independent on-page widget switch, full-settings access, and privacy-safe diagnostics. Turning off the widget removes only the Focus Bar; the chosen page cleanup and reading tools continue to run.
 
 ### Options page
 
@@ -52,7 +52,7 @@ The options page is the durable configuration surface: views, module categories,
 
 ### Focus Bar
 
-The Focus Bar sits immediately before the job description and uses Shadow DOM to isolate its UI styles. It provides contextual controls without covering job content. Its theme follows the nearest opaque page background.
+The Focus Bar sits immediately before the AI/profile-match module when that module is recognized, falling back to immediately before the job description. It uses Shadow DOM to isolate its UI styles and provides contextual controls without covering job content. The packaged logo appears directly before the JustTheRole name. Branding and view selection form a stable header, while actions and status occupy deliberate rows so wrapping does not split the interface arbitrarily.
 
 ## Accessibility
 
@@ -71,4 +71,4 @@ Use concise, literal labels. Avoid claims that the extension understands, evalua
 
 ## Responsive and theme behavior
 
-The popup uses an extension-sized layout. The options page adapts its grids for narrower windows. Injected markers define light and dark colors, while the Focus Bar uses system canvas colors and a detected light/dark scheme. No control relies on hover alone.
+The popup uses an extension-sized layout. The options page lets hero and explanatory copy use the available desktop width before switching to a stacked narrow layout. Injected markers define light and dark colors. The Focus Bar detects the page's rendered light or dark appearance, follows page-theme changes, and applies the same cream, green, surface, border, text, and focus-token family as the extension surfaces. No control relies on hover alone.

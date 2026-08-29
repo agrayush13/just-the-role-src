@@ -53,10 +53,19 @@
       .module h2 { margin: 0 0 6px; font-size: 17px; }
       .module p { margin: 0; color: #65716a; font-size: 13px; }
       [data-jtr-search-hidden] { display: none !important; }
+      :root[data-preview-theme="dark"] { color-scheme: dark; background: #17201c; color: #f2f4f2; }
+      :root[data-preview-theme="dark"] body { background: #17201c; }
+      :root[data-preview-theme="dark"] .app,
+      :root[data-preview-theme="dark"] .job-pane { background: #17201c; }
+      :root[data-preview-theme="dark"] .jobs-details > *,
+      :root[data-preview-theme="dark"] .site-nav,
+      :root[data-preview-theme="dark"] .jobs-search-results-list,
+      :root[data-preview-theme="dark"] .jobs-search-results__list-item { border-color: #3a4841; background: #1f2b25; color: #f2f4f2; }
     </style>
     <script>
       const query = new URLSearchParams(location.search);
       const searchMode = query.get("view") === "search";
+      if (query.get("theme") === "dark") document.documentElement.dataset.previewTheme = "dark";
       const settings = {
         schemaVersion: 2,
         enabled: true,
@@ -66,6 +75,7 @@
           aiMatch: true, applicantInsights: false, premiumUpsells: true,
           recommendations: true, footerPromotions: true, applicantCount: false,
           hiringTeam: false, peopleConnections: false, companyOverview: false,
+          jobDescription: false,
           topNavigation: false, searchResultsPane: false
         },
         keywordRules: [
@@ -76,7 +86,7 @@
         readingTools: { keywordsEnabled: true, sectionControlsEnabled: true },
         searchBeta: { compactDensity: searchMode, collapseViewed: searchMode, collapseApplied: searchMode },
         syncEnabled: false,
-        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline" }
+        uiPreferences: { reducedMotion: "reduce", controlPlacement: "inline", focusBarVisible: true }
       };
       window.chrome = {
         storage: {
@@ -87,6 +97,7 @@
         runtime: {
           onMessage: { addListener: () => {} },
           openOptionsPage: async () => {},
+          getURL: (path) => `/${path.replace(/^icons\//, "")}`,
           getManifest: () => ({ version: "0.3.0" })
         }
       };
