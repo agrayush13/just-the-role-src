@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JustTheRole settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <p class="eyebrow">JUSTTHEROLE</p>
+        <h1>Personal focus, without the guesswork.</h1>
+        <p>Choose what stays visible and mark only the criteria you define. Configuration stays local unless you explicitly enable Chrome Sync.</p>
+      </header>
+
+      <section class="panel master-panel" aria-labelledby="focus-heading">
+        <div>
+          <h2 id="focus-heading">Focus Mode</h2>
+          <p>Apply your preset and reading tools on supported job pages.</p>
+        </div>
+        <label class="switch"><input id="enabled" type="checkbox" /><span aria-hidden="true"></span><span class="sr-only">Enable Focus Mode</span></label>
+      </section>
+
+      <section class="panel" aria-labelledby="preset-heading">
+        <div class="section-heading">
+          <div><p class="step">01</p><h2 id="preset-heading">Choose a view</h2></div>
+          <p>Switch presets without reloading or changing your scroll position.</p>
+        </div>
+        <div id="presets" class="preset-grid" role="radiogroup" aria-label="View preset"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="modules-heading">
+        <div class="section-heading">
+          <div><p class="step">02</p><h2 id="modules-heading">Supported page blocks</h2></div>
+          <p>Changing a category creates a Custom preset. Core content and actions are never available here.</p>
+        </div>
+        <div id="modules" class="setting-list"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="keywords-heading">
+        <div class="section-heading">
+          <div><p class="step">03</p><h2 id="keywords-heading">Your keyword rules</h2></div>
+          <p>Up to 50 plain words or phrases. Matches are deterministic, local, and never converted into a score.</p>
+        </div>
+        <form id="keyword-form" class="keyword-form">
+          <input id="keyword-id" type="hidden" />
+          <label class="wide">Word or phrase<input id="keyword-text" type="text" maxlength="60" autocomplete="off" required /></label>
+          <label>Meaning<select id="keyword-type"><option value="positive">Desired</option><option value="neutral">Notice</option><option value="dealbreaker">Check</option></select></label>
+          <label>Match<select id="keyword-mode"><option value="whole-word">Whole word</option><option value="phrase">Exact phrase</option></select></label>
+          <button class="primary" type="submit">Save rule</button>
+          <button id="cancel-edit" type="button" hidden>Cancel edit</button>
+        </form>
+        <p id="keyword-error" class="error" role="alert"></p>
+        <div id="keyword-list" class="keyword-list"></div>
+      </section>
+
+      <section class="panel two-column" aria-label="Reading and storage settings">
+        <div>
+          <p class="step">04</p><h2>Reading tools</h2>
+          <div class="setting-list compact">
+            <label class="setting"><span><strong>Keyword markers</strong><small>Mark visible employer-written description text.</small></span><input id="keywords-enabled" type="checkbox" /></label>
+            <label class="setting"><span><strong>Section navigation</strong><small>Show controls only after two reliable English headings are found.</small></span><input id="sections-enabled" type="checkbox" /></label>
+          </div>
+        </div>
+        <div>
+          <p class="step">05</p><h2>Chrome Sync</h2>
+          <p class="disclosure">Off by default. When enabled, layout preferences and potentially sensitive keyword rules may be stored through your Chrome account. Local settings remain available if Sync fails.</p>
+          <label class="setting standalone"><span><strong>Sync configuration</strong></span><input id="sync-enabled" type="checkbox" /></label>
+        </div>
+      </section>
+
+      <section class="panel beta" aria-labelledby="beta-heading">
+        <p class="badge">SEPARATE BETA · DEFAULT OFF</p>
+        <h2 id="beta-heading">Search-list cleanup</h2>
+        <p>Only visibly labeled Viewed or Applied cards can be collapsed. Sponsored and promoted listings are hard-excluded.</p>
+        <div class="setting-list compact">
+          <label class="setting"><span><strong>Compact density</strong><small>Reduce spacing without removing card facts or actions.</small></span><input id="compact-density" type="checkbox" /></label>
+          <label class="setting"><span><strong>Collapse viewed jobs</strong><small>Add a reversible Show viewed counter.</small></span><input id="collapse-viewed" type="checkbox" /></label>
+          <label class="setting"><span><strong>Collapse applied jobs</strong><small>Add a reversible Show applied counter.</small></span><input id="collapse-applied" type="checkbox" /></label>
+        </div>
+      </section>
+
+      <div class="footer-actions">
+        <button id="reset" type="button">Reset Phase 2 defaults</button>
+        <a href="privacy.html" target="_blank">Privacy</a>
+        <p id="feedback" aria-live="polite"></p>
+      </div>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>

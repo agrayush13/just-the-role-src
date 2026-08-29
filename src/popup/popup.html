@@ -26,12 +26,19 @@
         </label>
       </section>
 
-      <fieldset id="categories">
-        <legend>Hide these categories</legend>
-      </fieldset>
+      <section class="preset-control" aria-labelledby="preset-label">
+        <label id="preset-label" for="preset">View preset</label>
+        <select id="preset">
+          <option value="balanced">Balanced</option>
+          <option value="minimal">Minimal</option>
+          <option value="native">Native</option>
+          <option value="custom">Custom</option>
+        </select>
+        <p id="match-summary">Keyword and section tools follow your full settings.</p>
+      </section>
 
       <div class="actions">
-        <button id="reset" type="button">Reset defaults</button>
+        <button id="open-options" class="primary" type="button">Keywords & settings</button>
         <button id="copy-diagnostics" type="button">Copy diagnostics</button>
       </div>
       <p id="feedback" class="feedback" aria-live="polite"></p>

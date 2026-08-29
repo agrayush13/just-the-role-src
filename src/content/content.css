@@ -1,91 +1,104 @@
-html[data-jtr-active="true"] {
-  scroll-behavior: auto !important;
-}
-
-[data-jtr-hidden="true"] {
+[data-jtr-hidden="true"],
+[data-jtr-section-collapsed="true"],
+[data-jtr-search-hidden] {
   display: none !important;
 }
 
-.jtr-control {
-  box-sizing: border-box;
-  margin: 12px 0;
-  padding: 10px 12px;
-  border: 1px solid color-mix(in srgb, currentColor 18%, transparent);
-  border-radius: 10px;
-  background: Canvas;
-  color: CanvasText;
-  font: 600 14px/1.35 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+[data-jtr-picker-category] {
+  position: relative !important;
+  outline: 3px solid #0a66c2 !important;
+  outline-offset: 3px !important;
+  cursor: pointer !important;
 }
 
-.jtr-control__row {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px 12px;
-}
-
-.jtr-control__brand {
-  margin-right: auto;
-  letter-spacing: -0.01em;
-}
-
-.jtr-toggle,
-.jtr-link-button {
-  min-height: 36px;
-  border-radius: 18px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.jtr-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 6px 12px;
-  border: 1px solid #0a66c2;
-  background: transparent;
-  color: #0a66c2;
-}
-
-.jtr-toggle[data-active="true"] {
+[data-jtr-picker-category]::before {
+  content: "JustTheRole: " attr(data-jtr-picker-label);
+  position: absolute;
+  z-index: 2147483646;
+  top: 4px;
+  right: 4px;
+  padding: 4px 7px;
+  border-radius: 5px;
   background: #0a66c2;
   color: #fff;
+  font: 700 11px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  pointer-events: none;
 }
 
-.jtr-toggle__icon {
-  font-size: 17px;
-  line-height: 1;
+mark[data-jtr-mark] {
+  position: relative;
+  padding: 0 2px;
+  border-radius: 3px;
+  color: inherit;
+  font-weight: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
-.jtr-link-button {
-  padding: 6px 10px;
-  border: 0;
+mark[data-jtr-keyword-type="positive"] {
+  border-bottom: 2px solid #20845b;
+  background: #dff5e9;
+}
+
+mark[data-jtr-keyword-type="neutral"] {
+  border-bottom: 2px dotted #0a66c2;
+  background: #e1efff;
+}
+
+mark[data-jtr-keyword-type="dealbreaker"] {
+  border: 1px solid #b36b00;
+  background: #fff0ce;
+}
+
+mark[data-jtr-mark]::after {
+  margin-left: 3px;
+  color: #24312b;
+  font: 700 9px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  vertical-align: .12em;
+}
+
+mark[data-jtr-keyword-type="positive"]::after { content: "Desired"; }
+mark[data-jtr-keyword-type="neutral"]::after { content: "Notice"; }
+mark[data-jtr-keyword-type="dealbreaker"]::after { content: "Check"; }
+
+.jtr-section-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  margin: -2px 0 10px;
+  padding: 3px 8px;
+  border: 1px solid currentColor;
+  border-radius: 99px;
   background: transparent;
-  color: LinkText;
-  text-decoration: underline;
+  color: #0a66c2;
+  font: 600 11px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  cursor: pointer;
+  vertical-align: middle;
 }
 
-.jtr-toggle:focus-visible,
-.jtr-link-button:focus-visible {
+.jtr-section-toggle:focus-visible {
   outline: 3px solid #70b5f9;
   outline-offset: 2px;
 }
 
-.jtr-control__status:empty {
-  display: none;
+[data-jtr-search-compact="true"] .jobs-search-results__list-item,
+[data-jtr-search-compact="true"] li[data-occludable-job-id] {
+  padding-block: 4px !important;
 }
 
-.jtr-control__status {
-  margin: 7px 0 0;
-  color: GrayText;
-  font-weight: 400;
+@media (prefers-color-scheme: dark) {
+  mark[data-jtr-keyword-type="positive"] { background: #164f38; }
+  mark[data-jtr-keyword-type="neutral"] { background: #183f67; }
+  mark[data-jtr-keyword-type="dealbreaker"] { background: #664515; }
+  mark[data-jtr-mark]::after { color: inherit; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .jtr-control *,
-  .jtr-control *::before,
-  .jtr-control *::after {
+  [data-jtr-picker-category],
+  mark[data-jtr-mark],
+  .jtr-section-toggle {
     animation: none !important;
     transition: none !important;
+    scroll-behavior: auto !important;
   }
 }

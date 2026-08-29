@@ -1,18 +1,26 @@
 import {
-  CATEGORY_KEYS,
-  CATEGORY_LABELS,
-  DEFAULT_SETTINGS,
   loadSettings,
   saveSettings,
+  settingsForPreset,
   type CategoryKey,
+  type KeywordType,
+  type Preset,
   type Settings,
 } from "../shared/settings";
 
 interface ContentStatus {
   pageStatus: "supported" | "unsupported" | "waiting";
-  temporaryFullPage: boolean;
+  temporaryOriginal: boolean;
   selectorMapVersion: string;
   matchedCounts: Partial<Record<CategoryKey, number>>;
+  keywordCounts: Record<KeywordType, number>;
+  activePreset: Preset;
+  diagnostics: {
+    applyMs: number;
+    keywordMs: number;
+    detectedModuleIds: CategoryKey[];
+    sectionCount: number;
+  };
   urlKind: string;
 }
 
@@ -20,47 +28,29 @@ let settings: Settings;
 let contentStatus: ContentStatus | null = null;
 
 const masterToggle = document.querySelector<HTMLInputElement>("#master-toggle")!;
-const categories = document.querySelector<HTMLFieldSetElement>("#categories")!;
+const presetSelect = document.querySelector<HTMLSelectElement>("#preset")!;
 const pageStatus = document.querySelector<HTMLElement>("#page-status")!;
+const matchSummary = document.querySelector<HTMLElement>("#match-summary")!;
 const feedback = document.querySelector<HTMLElement>("#feedback")!;
 
 function render(): void {
   masterToggle.checked = settings.enabled;
-  categories.querySelectorAll<HTMLInputElement>("input[data-category]").forEach((input) => {
-    input.checked = settings.categories[input.dataset.category as CategoryKey];
-  });
+  presetSelect.value = settings.activePreset;
+  const counts = contentStatus?.keywordCounts;
+  const total = counts ? counts.positive + counts.neutral + counts.dealbreaker : 0;
+  matchSummary.textContent = total
+    ? `${total} keyword match${total === 1 ? "" : "es"} · ${contentStatus?.diagnostics.sectionCount ?? 0} recognized sections`
+    : "Keyword and section tools follow your full settings.";
 }
 
 async function persist(): Promise<void> {
-  await saveSettings(settings);
-  feedback.textContent = "Saved";
-  window.setTimeout(() => (feedback.textContent = ""), 1200);
-}
-
-function buildCategories(): void {
-  const fragment = document.createDocumentFragment();
-  for (const key of CATEGORY_KEYS) {
-    const label = document.createElement("label");
-    label.className = "category";
-    const text = document.createElement("span");
-    text.textContent = CATEGORY_LABELS[key];
-    const input = document.createElement("input");
-    input.type = "checkbox";
-    input.dataset.category = key;
-    input.addEventListener("change", async () => {
-      settings = {
-        ...settings,
-        categories: { ...settings.categories, [key]: input.checked },
-      };
-      await persist();
-    });
-    label.append(text, input);
-    fragment.append(label);
-  }
-  categories.append(fragment);
+  const result = await saveSettings(settings);
+  feedback.textContent = result.syncError ? "Saved locally; Chrome Sync is unavailable" : "Saved";
+  window.setTimeout(() => { feedback.textContent = ""; }, 1200);
 }
 
 async function getActiveTabStatus(): Promise<ContentStatus | null> {
+  if (typeof chrome === "undefined" || !chrome.tabs) return null;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return null;
   try {
@@ -75,12 +65,13 @@ masterToggle.addEventListener("change", async () => {
   await persist();
 });
 
-document.querySelector("#reset")?.addEventListener("click", async () => {
-  settings = structuredClone(DEFAULT_SETTINGS);
+presetSelect.addEventListener("change", async () => {
+  settings = settingsForPreset(settings, presetSelect.value as Preset);
   render();
   await persist();
-  feedback.textContent = "Recommended defaults restored";
 });
+
+document.querySelector("#open-options")?.addEventListener("click", () => void chrome.runtime.openOptionsPage());
 
 document.querySelector("#copy-diagnostics")?.addEventListener("click", async () => {
   const manifest = chrome.runtime.getManifest();
@@ -89,31 +80,36 @@ document.querySelector("#copy-diagnostics")?.addEventListener("click", async () 
     extensionVersion: manifest.version,
     settingsSchemaVersion: settings.schemaVersion,
     enabled: settings.enabled,
-    enabledCategories: CATEGORY_KEYS.filter((key) => settings.categories[key]),
+    activePreset: settings.activePreset,
     pageStatus: contentStatus?.pageStatus ?? "unavailable",
-    temporaryFullPage: contentStatus?.temporaryFullPage ?? false,
+    temporaryOriginal: contentStatus?.temporaryOriginal ?? false,
     selectorMapVersion: contentStatus?.selectorMapVersion ?? "unavailable",
-    matchedCounts: contentStatus?.matchedCounts ?? {},
-    urlKind: contentStatus?.urlKind ?? "unavailable",
-    userAgent: navigator.userAgent.replace(/\([^)]*\)/, "(redacted)"),
+    matchedModuleIds: Object.keys(contentStatus?.matchedCounts ?? {}),
+    detectedModuleIds: contentStatus?.diagnostics.detectedModuleIds ?? [],
+    keywordMatchCounts: contentStatus?.keywordCounts ?? {},
+    sectionCount: contentStatus?.diagnostics.sectionCount ?? 0,
+    timingsMs: {
+      apply: contentStatus?.diagnostics.applyMs ?? null,
+      keywords: contentStatus?.diagnostics.keywordMs ?? null,
+    },
+    routeType: contentStatus?.urlKind ?? "unavailable",
   };
   await navigator.clipboard.writeText(JSON.stringify(diagnostics, null, 2));
-  feedback.textContent = "Diagnostics copied — no page or account content included";
+  feedback.textContent = "Safe diagnostics copied — no text, URL, or account data included";
 });
 
 async function start(): Promise<void> {
   settings = await loadSettings();
-  buildCategories();
-  render();
   contentStatus = await getActiveTabStatus();
   pageStatus.textContent =
     contentStatus?.pageStatus === "supported"
-      ? contentStatus.temporaryFullPage
-        ? "Supported job page · showing full page for this session"
-        : "Supported job page"
+      ? contentStatus.temporaryOriginal
+        ? "Supported job page · original view shown for this session"
+        : `Supported job page · ${contentStatus.activePreset} view`
       : contentStatus?.pageStatus === "waiting"
         ? "Waiting for the job details to finish loading"
         : "Open a signed-in LinkedIn job page to use Focus Mode";
+  render();
 }
 
 void start();

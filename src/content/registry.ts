@@ -3,15 +3,17 @@ import type { CategoryKey } from "../shared/settings";
 export interface ModuleRule {
   category: CategoryKey;
   selectors: readonly string[];
+  selectable: boolean;
 }
 
 // Conservative selectors only. Each match is independently safety-checked before hiding.
 // Keep this registry centralized and versioned so LinkedIn changes are easy to audit.
-export const SELECTOR_MAP_VERSION = "2026-08-27.1";
+export const SELECTOR_MAP_VERSION = "2026-08-28.2";
 
 export const MODULE_RULES: readonly ModuleRule[] = [
   {
     category: "aiMatch",
+    selectable: true,
     selectors: [
       ".job-details-how-you-match-card__container",
       ".jobs-details__job-match-card",
@@ -20,6 +22,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "applicantInsights",
+    selectable: true,
     selectors: [
       ".jobs-premium-applicant-insights",
       ".job-details-jobs-unified-top-card__applicant-insights",
@@ -28,6 +31,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "premiumUpsells",
+    selectable: true,
     selectors: [
       ".jobs-premium-company-growth",
       ".jobs-premium-job-details-card",
@@ -36,6 +40,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "recommendations",
+    selectable: true,
     selectors: [
       ".jobs-similar-jobs-list",
       ".jobs-recommended-jobs-list",
@@ -45,6 +50,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "footerPromotions",
+    selectable: true,
     selectors: [
       ".jobs-details__footer",
       ".jobs-details__promoted-jobs",
@@ -53,6 +59,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "applicantCount",
+    selectable: true,
     selectors: [
       ".job-details-jobs-unified-top-card__applicant-count",
       ".jobs-unified-top-card__applicant-count",
@@ -60,6 +67,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "hiringTeam",
+    selectable: true,
     selectors: [
       ".jobs-poster",
       ".hirer-card__container",
@@ -68,6 +76,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "peopleConnections",
+    selectable: true,
     selectors: [
       ".jobs-company__box",
       "[data-view-name='job-connections-card']",
@@ -76,6 +85,7 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "companyOverview",
+    selectable: true,
     selectors: [
       ".jobs-company",
       ".jobs-company__card",
@@ -84,10 +94,12 @@ export const MODULE_RULES: readonly ModuleRule[] = [
   },
   {
     category: "topNavigation",
+    selectable: false,
     selectors: ["header.global-nav", ".global-nav"],
   },
   {
     category: "searchResultsPane",
+    selectable: false,
     selectors: [
       ".jobs-search-results-list",
       ".jobs-search-two-pane__left-rail",
@@ -121,8 +133,14 @@ export const PROTECTED_SELECTORS = [
   ...DESCRIPTION_SELECTORS,
   ".jobs-apply-button",
   ".jobs-save-button",
+  ".job-details-jobs-unified-top-card__company-name",
+  ".job-details-jobs-unified-top-card__primary-description-container",
+  "[data-view-name='job-company-name']",
+  "[data-view-name='job-location']",
   "[data-control-name*='share']",
   "[data-control-name*='report']",
+  "[data-control-name*='navigation']",
+  "[data-control-name*='account']",
 ] as const;
 
 export function isSafeCandidate(candidate: Element, jobRoot: Element): boolean {

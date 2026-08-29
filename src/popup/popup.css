@@ -76,12 +76,15 @@ h2 { font-size: 16px; }
 .switch input:checked + span::after { transform: translateX(18px); background: white; }
 .switch input:focus-visible + span { outline: 3px solid #8cc6ab; outline-offset: 2px; }
 
-fieldset {
+.preset-control {
   margin: 18px 0 0;
-  padding: 0;
-  border: 0;
+  padding: 13px;
+  border: 1px solid #dddcd7;
+  border-radius: 10px;
 }
-legend { margin-bottom: 8px; font-size: 13px; font-weight: 700; }
+.preset-control label { display: block; margin-bottom: 7px; font-size: 13px; font-weight: 700; }
+.preset-control select { width: 100%; min-height: 38px; padding: 6px 8px; border: 1px solid #87928c; border-radius: 8px; background: Canvas; color: CanvasText; font: inherit; }
+.preset-control p { margin: 8px 0 0; color: #68736d; font-size: 11px; line-height: 1.4; }
 
 .category {
   display: flex;
@@ -107,6 +110,7 @@ button {
   font: 600 12px/1 inherit;
   cursor: pointer;
 }
+button.primary { border-color: #276749; background: #276749; color: #fff; }
 button:focus-visible, a:focus-visible { outline: 3px solid #8cc6ab; outline-offset: 2px; }
 
 .feedback { min-height: 16px; margin: 8px 0 0; color: #276749; font-size: 12px; }

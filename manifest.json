@@ -2,13 +2,17 @@
   "manifest_version": 3,
   "name": "JustTheRole - Clean job descriptions",
   "short_name": "JustTheRole",
-  "version": "0.1.0",
-  "description": "Only the role. None of the noise.",
+  "version": "0.2.0",
+  "description": "A personal focus layer for faster, privacy-first job evaluation.",
   "permissions": ["storage"],
   "host_permissions": ["https://www.linkedin.com/jobs/*"],
   "action": {
     "default_title": "JustTheRole",
     "default_popup": "popup.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
   },
   "content_scripts": [
     {
@@ -16,12 +20,6 @@
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
-    }
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": ["privacy.html"],
-      "matches": ["https://www.linkedin.com/*"]
     }
   ]
 }

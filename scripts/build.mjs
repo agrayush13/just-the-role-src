@@ -23,6 +23,15 @@ await Promise.all([
     sourcemap: false,
     legalComments: "none",
   }),
+  build({
+    entryPoints: ["src/options/index.ts"],
+    outfile: "dist/options.js",
+    bundle: true,
+    format: "iife",
+    target: "chrome120",
+    sourcemap: false,
+    legalComments: "none",
+  }),
 ]);
 
 await Promise.all([
@@ -30,6 +39,8 @@ await Promise.all([
   cp("src/content/content.css", "dist/content.css"),
   cp("src/popup/popup.html", "dist/popup.html"),
   cp("src/popup/popup.css", "dist/popup.css"),
+  cp("src/options/options.html", "dist/options.html"),
+  cp("src/options/options.css", "dist/options.css"),
   cp("src/privacy/privacy.html", "dist/privacy.html"),
 ]);
 
