@@ -4,6 +4,10 @@ JUSTTHEROLE is a privacy-first Chrome extension that turns supported LinkedIn Jo
 
 The extension is deterministic and visual-only. It does not scrape jobs, summarize or score descriptions, automate LinkedIn actions, collect analytics, store job content, or make extension-initiated network requests.
 
+## Install
+
+[Install JUSTTHEROLE from the Chrome Web Store](https://chromewebstore.google.com/detail/justtherole-clean-job-des/ecojokoikohemnohhccokbbkilpekhff)
+
 ## What it does
 
 Focus Mode is off on a fresh install. After the user enables it, JUSTTHEROLE applies one of these views:
