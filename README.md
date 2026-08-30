@@ -39,6 +39,19 @@ JUSTTHEROLE does not store page text, job URLs, titles, companies, profile or ac
 
 LinkedIn can change its DOM independently. Selectors are centralized and versioned, every candidate is safety-checked independently, and unrecognized structures fail open by remaining visible. Disabling Focus Mode or choosing **Show original** restores all changes to LinkedIn content; the independently enabled Focus Bar may remain available as extension UI.
 
+## Technology
+
+JUSTTHEROLE is a Manifest V3 Chrome extension written in TypeScript. It uses esbuild for bundled, self-contained extension assets, Chrome's built-in extension APIs for settings and activation, and Node's test runner with Happy DOM for automated behavior and DOM-safety coverage.
+
+## Chrome permissions
+
+| Permission | Scope | Why it is needed |
+| --- | --- | --- |
+| `storage` | Extension configuration | Saves Focus Mode, view, keyword, reading-tool, and interface preferences locally and, only when enabled by the user, through Chrome Sync. |
+| `activeTab` | Current tab after the user opens the popup | Temporarily activates JUSTTHEROLE on an already-open supported job page after installation or an extension reload. |
+| `scripting` | Packaged extension files on the active tab | Injects the bundled content script and stylesheet when the supported page does not already have the current extension code. |
+| Host access | `https://*.linkedin.com/jobs/*` | Runs the reading and visibility tools only on LinkedIn Jobs paths, including regional LinkedIn hosts. |
+
 ## Documentation
 
 - [Product requirements](docs/PRD.md) — scope, behavior, non-goals, and acceptance criteria.
@@ -95,3 +108,7 @@ docs/          Product and engineering documentation
 `npm run verify` covers settings normalization and migration, presets, storage changes, untrusted-label escaping, selector safety, keyword validation/matching/restoration, a 25,000-character description pass, and conservative section recognition.
 
 Before publishing, also load the unpacked build and validate the selector map against current signed-in LinkedIn job-detail and search views. Automated fixtures cannot guarantee compatibility with markup LinkedIn changes after release.
+
+## Licence
+
+JUSTTHEROLE is available under the [MIT Licence](LICENSE).

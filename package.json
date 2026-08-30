@@ -2,6 +2,7 @@
   "name": "just-the-role",
   "version": "0.3.0",
   "private": true,
+  "license": "MIT",
   "description": "A privacy-first focused reading mode for LinkedIn job descriptions.",
   "scripts": {
     "build": "node scripts/build.mjs",
